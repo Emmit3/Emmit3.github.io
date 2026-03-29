@@ -11,14 +11,9 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --bg: #0f0f0f;
-      --card: #181818;
-      --border: #252525;
-      --accent: #4ec9b0;
-      --pink: #ff6b9d;
-      --blue: #60a5fa;
-      --text: #e8e8e8;
-      --muted: #6e6e6e;
+      --bg: #0f0f0f; --card: #181818; --border: #252525;
+      --accent: #4ec9b0; --pink: #ff6b9d; --blue: #60a5fa;
+      --text: #e8e8e8; --muted: #6e6e6e;
       --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       --mono: 'JetBrains Mono', ui-monospace, monospace;
     }
@@ -27,169 +22,29 @@
 
     body {
       font-family: var(--font);
-      background: var(--bg);
+      background: #000;
       color: var(--text);
       overflow: hidden;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ════════════════════════════════════════
-       INTRO
-    ════════════════════════════════════════ */
-    #intro {
+    /* ── INTRO CANVAS ── */
+    #scene-canvas {
       position: fixed;
       inset: 0;
       z-index: 1000;
-      background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #robot-wrap {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #robot-canvas {
       display: block;
-      transform-origin: 50% 35%;
-      transition: transform 1.9s cubic-bezier(0.4, 0, 0.1, 1),
-                  opacity 0.4s ease;
     }
 
-    #robot-canvas.zoom-in  { transform: scale(20); }
-    #robot-canvas.fade-out { opacity: 0; }
-
-    /* POV HUD */
-    #pov-hud {
-      position: absolute;
-      inset: 0;
-      background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.4s;
-    }
-
-    #pov-hud.active {
-      opacity: 1;
-      pointer-events: all;
-      cursor: pointer;
-    }
-
-    /* scanlines */
-    #pov-hud::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(
-        to bottom,
-        transparent 0, transparent 3px,
-        rgba(78,201,176,.02) 3px, rgba(78,201,176,.02) 4px
-      );
-      pointer-events: none;
-    }
-
-    /* vignette */
-    #pov-hud::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse 70% 70% at 50% 50%, transparent 50%, rgba(0,0,0,.85) 100%);
-      pointer-events: none;
-    }
-
-    /* Corner brackets */
-    .hud-c {
-      position: absolute;
-      width: 48px;
-      height: 48px;
-      z-index: 1;
-    }
-    .hud-c::before, .hud-c::after {
-      content: '';
-      position: absolute;
-      background: #4ec9b0;
-      opacity: .55;
-    }
-    .hud-c::before { width: 2px; height: 18px; }
-    .hud-c::after  { width: 18px; height: 2px; }
-
-    .hud-tl { top:22px; left:22px; }
-    .hud-tl::before { top:0; left:0; }
-    .hud-tl::after  { top:0; left:0; }
-
-    .hud-tr { top:22px; right:22px; }
-    .hud-tr::before { top:0; right:0; }
-    .hud-tr::after  { top:0; right:0; }
-
-    .hud-bl { bottom:22px; left:22px; }
-    .hud-bl::before { bottom:0; left:0; }
-    .hud-bl::after  { bottom:0; left:0; }
-
-    .hud-br { bottom:22px; right:22px; }
-    .hud-br::before { bottom:0; right:0; }
-    .hud-br::after  { bottom:0; right:0; }
-
-    /* HUD labels */
-    .hud-lbl {
-      position: absolute;
-      font-family: var(--mono);
-      font-size: 9px;
-      letter-spacing: 2px;
-      color: rgba(78,201,176,.45);
-      z-index: 1;
-    }
-    .hud-lbl.top    { top:27px;    left:50%; transform:translateX(-50%); }
-    .hud-lbl.bottom { bottom:27px; left:50%; transform:translateX(-50%); }
-
-    /* Click prompt */
-    #click-prompt {
-      position: relative;
-      z-index: 2;
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 6px;
-      color: rgba(255,255,255,.65);
-      text-transform: uppercase;
-      animation: blink 2.2s ease-in-out infinite;
-      text-align: center;
-    }
-
-    /* Horizontal crosshair lines */
-    #click-prompt::before,
-    #click-prompt::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      width: 28px;
-      height: 1px;
-      background: rgba(78,201,176,.3);
-    }
-    #click-prompt::before { right: calc(100% + 14px); }
-    #click-prompt::after  { left:  calc(100% + 14px); }
-
-    @keyframes blink {
-      0%,100% { opacity: .25; }
-      50%      { opacity: 1;   }
-    }
-
-    /* Skip button */
+    /* ── SKIP ── */
     #skip-btn {
       position: fixed;
-      bottom: 28px;
-      right: 28px;
-      z-index: 1001;
+      bottom: 28px; right: 28px;
+      z-index: 1002;
       font-family: var(--mono);
       font-size: 9px;
       letter-spacing: 3px;
-      color: rgba(78,201,176,.35);
+      color: rgba(255,140,30,.3);
       text-transform: uppercase;
       background: none;
       border: none;
@@ -197,303 +52,84 @@
       padding: 8px 0;
       transition: color .2s;
     }
-    #skip-btn:hover { color: rgba(78,201,176,.75); }
+    #skip-btn:hover { color: rgba(255,140,30,.75); }
 
-    /* ════════════════════════════════════════
-       PORTFOLIO
-    ════════════════════════════════════════ */
+    /* ── PORTFOLIO ── */
     #portfolio { display: none; }
 
-    /* NAV */
     nav {
-      position: sticky;
-      top: 0;
-      z-index: 50;
+      position: sticky; top: 0; z-index: 50;
       padding: 18px max(24px, calc((100vw - 720px) / 2));
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 32px;
+      display: flex; align-items: center; justify-content: space-between; gap: 32px;
       background: rgba(15,15,15,.88);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
     }
-
-    .nav-brand {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text);
-      text-decoration: none;
-      letter-spacing: -.02em;
-    }
-
+    .nav-brand { font-size: 15px; font-weight: 600; color: var(--text); text-decoration: none; letter-spacing: -.02em; }
     nav ul { list-style: none; display: flex; gap: 22px; }
-
-    nav a {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 14px;
-      transition: color .18s;
-    }
+    nav a { color: var(--muted); text-decoration: none; font-size: 14px; transition: color .18s; }
     nav a:hover { color: var(--text); }
-
     .nav-icons { display: flex; gap: 20px; }
 
-    /* MAIN */
-    main {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 60px 24px 96px;
-    }
+    main { max-width: 720px; margin: 0 auto; padding: 60px 24px 96px; }
 
-    /* Stagger-reveal animation */
-    .reveal-item {
-      opacity: 0;
-      transform: translateY(22px);
-      transition: opacity .55s ease, transform .55s ease;
-    }
-    .reveal-item.in {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .reveal-item { opacity: 0; transform: translateY(22px); transition: opacity .55s ease, transform .55s ease; }
+    .reveal-item.in { opacity: 1; transform: translateY(0); }
 
-    /* HERO */
-    .hero {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 36px;
-      margin-bottom: 72px;
-    }
-
+    .hero { display: flex; justify-content: space-between; align-items: flex-start; gap: 36px; margin-bottom: 72px; }
     .hero-left { flex: 1; }
-
-    .hero-hello {
-      font-size: 21px;
-      color: var(--muted);
-      font-weight: 400;
-      margin-bottom: 2px;
-    }
-
-    h1.hero-name {
-      font-size: 50px;
-      font-weight: 700;
-      letter-spacing: -.04em;
-      line-height: 1.05;
-      margin-bottom: 22px;
-    }
-
-    .hero-bio {
-      font-size: 15px;
-      line-height: 1.78;
-      color: var(--muted);
-    }
-
+    .hero-hello { font-size: 21px; color: var(--muted); font-weight: 400; margin-bottom: 2px; }
+    h1.hero-name { font-size: 50px; font-weight: 700; letter-spacing: -.04em; line-height: 1.05; margin-bottom: 22px; }
+    .hero-bio { font-size: 15px; line-height: 1.78; color: var(--muted); }
     .hero-bio a { color: var(--accent); text-decoration: none; }
     .hero-bio a:hover { text-decoration: underline; }
 
     .headshot-frame {
-      width: 148px;
-      height: 148px;
-      flex-shrink: 0;
-      border-radius: 16px;
-      overflow: hidden;
-      transform: rotate(3deg);
-      border: 1px solid var(--border);
+      width: 148px; height: 148px; flex-shrink: 0; border-radius: 16px; overflow: hidden;
+      transform: rotate(3deg); border: 1px solid var(--border);
       box-shadow: 0 12px 40px rgba(0,0,0,.55);
       transition: transform .4s cubic-bezier(.34,1.56,.64,1);
-      background: var(--card);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: default;
+      background: var(--card); display: flex; align-items: center; justify-content: center;
     }
-
     .headshot-frame:hover { transform: rotate(0deg); }
+    .headshot-placeholder { font-family: var(--mono); font-size: 10px; color: var(--muted); text-align: center; line-height: 1.7; padding: 16px; }
+    .headshot-frame img { width: 100%; height: 100%; object-fit: cover; }
 
-    .headshot-placeholder {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--muted);
-      text-align: center;
-      line-height: 1.7;
-      padding: 16px;
-    }
-
-    .headshot-frame img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    /* SECTION HEADER */
-    .sec-head {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 22px;
-    }
-
-    .sec-head h2 {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-
-    .sec-line {
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    .sec-more {
-      font-size: 13px;
-      color: var(--accent) !important;
-      white-space: nowrap;
-    }
-
+    .sec-head { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+    .sec-head h2 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); white-space: nowrap; }
+    .sec-line { flex: 1; height: 1px; background: var(--border); }
+    .sec-more { font-size: 13px; color: var(--accent) !important; white-space: nowrap; }
     section { margin-bottom: 64px; }
 
-    /* PROJECT CARDS */
-    .projects-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 13px;
-    }
+    .projects-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; }
+    .proj-card { display: block; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px 16px; text-decoration: none; color: var(--text); transition: border-color .2s, transform .22s, box-shadow .22s; }
+    .proj-card:hover { border-color: rgba(78,201,176,.45); transform: translateY(-3px); box-shadow: 0 14px 36px rgba(0,0,0,.45), 0 0 0 1px rgba(78,201,176,.08); }
+    .proj-stats { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--muted); margin-bottom: 16px; }
+    .proj-icon { width: 46px; height: 46px; border-radius: 11px; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; }
+    .proj-name { font-size: 13px; font-weight: 600; text-align: center; margin-bottom: 7px; }
+    .proj-desc { font-size: 11.5px; color: var(--muted); line-height: 1.5; text-align: center; }
 
-    .proj-card {
-      display: block;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 18px 16px;
-      text-decoration: none;
-      color: var(--text);
-      transition: border-color .2s, transform .22s, box-shadow .22s;
-    }
-
-    .proj-card:hover {
-      border-color: rgba(78,201,176,.45);
-      transform: translateY(-3px);
-      box-shadow: 0 14px 36px rgba(0,0,0,.45), 0 0 0 1px rgba(78,201,176,.08);
-    }
-
-    .proj-stats {
-      display: flex;
-      justify-content: space-between;
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--muted);
-      margin-bottom: 16px;
-    }
-
-    .proj-icon {
-      width: 46px;
-      height: 46px;
-      border-radius: 11px;
-      margin: 0 auto 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .proj-name {
-      font-size: 13px;
-      font-weight: 600;
-      text-align: center;
-      margin-bottom: 7px;
-    }
-
-    .proj-desc {
-      font-size: 11.5px;
-      color: var(--muted);
-      line-height: 1.5;
-      text-align: center;
-    }
-
-    /* POSTS */
     .post-list { list-style: none; }
-
-    .post-row {
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
-      padding: 9px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
+    .post-row { display: flex; align-items: baseline; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
     .post-row:first-child { padding-top: 0; }
     .post-row:last-child  { border-bottom: none; }
-
-    .post-row a {
-      color: var(--text);
-      text-decoration: none;
-      font-size: 14px;
-      transition: color .18s;
-    }
+    .post-row a { color: var(--text); text-decoration: none; font-size: 14px; transition: color .18s; }
     .post-row a:hover { color: var(--accent); }
+    .post-dots { flex: 1; border-bottom: 1px dotted var(--border); margin-bottom: 3px; min-width: 16px; }
+    .post-date { font-family: var(--mono); font-size: 10.5px; color: var(--muted); white-space: nowrap; }
 
-    .post-dots {
-      flex: 1;
-      border-bottom: 1px dotted var(--border);
-      margin-bottom: 3px;
-      min-width: 16px;
-    }
-
-    .post-date {
-      font-family: var(--mono);
-      font-size: 10.5px;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-
-    /* ABOUT */
-    .about-body p {
-      font-size: 15px;
-      line-height: 1.8;
-      color: var(--muted);
-      margin-bottom: 14px;
-    }
+    .about-body p { font-size: 15px; line-height: 1.8; color: var(--muted); margin-bottom: 14px; }
     .about-body p:last-child { margin-bottom: 0; }
     .about-body a { color: var(--accent); text-decoration: none; }
     .about-body a:hover { text-decoration: underline; }
 
-    /* CHIPS */
     .chip-row { display: flex; flex-wrap: wrap; gap: 9px; }
+    .chip { display: inline-flex; align-items: center; gap: 7px; padding: 7px 15px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; color: var(--muted); font-size: 13px; text-decoration: none; transition: color .18s, border-color .18s, background .18s; }
+    .chip:hover { color: var(--text); border-color: rgba(78,201,176,.4); background: rgba(78,201,176,.04); }
 
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 7px 15px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      color: var(--muted);
-      font-size: 13px;
-      text-decoration: none;
-      transition: color .18s, border-color .18s, background .18s;
-    }
-    .chip:hover {
-      color: var(--text);
-      border-color: rgba(78,201,176,.4);
-      background: rgba(78,201,176,.04);
-    }
-
-    /* FOOTER */
-    footer {
-      text-align: center;
-      padding: 28px 24px 48px;
-      font-size: 12.5px;
-      color: var(--muted);
-      border-top: 1px solid var(--border);
-    }
+    footer { text-align: center; padding: 28px 24px 48px; font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--border); }
     footer a { color: var(--accent); text-decoration: none; }
 
-    /* Scrollbar */
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -502,34 +138,12 @@
 </head>
 <body>
 
-<!-- ════════════════════════════════════════
-     INTRO SCREEN
-════════════════════════════════════════ -->
-<div id="intro">
-  <div id="robot-wrap">
-    <canvas id="robot-canvas" width="360" height="360"></canvas>
-  </div>
-
-  <div id="pov-hud">
-    <div class="hud-c hud-tl"></div>
-    <div class="hud-c hud-tr"></div>
-    <div class="hud-c hud-bl"></div>
-    <div class="hud-c hud-br"></div>
-    <span class="hud-lbl top">SYS:ACTIVE — CAM_01</span>
-    <span class="hud-lbl bottom">INPUT:PENDING // AWAITING</span>
-    <div id="click-prompt">click</div>
-  </div>
-
-</div>
-
-<!-- Particle canvas lives OUTSIDE intro so it persists over the portfolio during reveal -->
-<canvas id="particle-canvas" style="position:fixed;inset:0;pointer-events:none;z-index:999;"></canvas>
+<canvas id="scene-canvas"></canvas>
 <button id="skip-btn">skip →</button>
 
-
-<!-- ════════════════════════════════════════
+<!-- ══════════════════════════════════════
      PORTFOLIO
-════════════════════════════════════════ -->
+══════════════════════════════════════ -->
 <div id="portfolio">
   <nav>
     <a href="#" class="nav-brand">Edmund</a>
@@ -545,8 +159,6 @@
   </nav>
 
   <main>
-
-    <!-- HERO -->
     <div class="hero reveal-item">
       <div class="hero-left">
         <p class="hero-hello">Hello,</p>
@@ -560,135 +172,70 @@
         </p>
       </div>
       <div class="headshot-frame">
-        <!-- Replace src with your actual photo path, e.g. src="headshot.jpg" -->
         <div class="headshot-placeholder">[ your<br>photo<br>here ]</div>
       </div>
     </div>
 
-    <!-- PROJECTS -->
     <section id="projects" class="reveal-item">
       <div class="sec-head">
         <h2>Featured Projects</h2>
         <div class="sec-line"></div>
         <a href="#" class="sec-more">see all →</a>
       </div>
-
       <div class="projects-row">
-
         <a href="#" class="proj-card">
-          <div class="proj-stats">
-            <span>↓ 48K/mo</span>
-            <span>★ 912</span>
-          </div>
+          <div class="proj-stats"><span>↓ 48K/mo</span><span>★ 912</span></div>
           <div class="proj-icon" style="background:linear-gradient(135deg,#112219,#1b3a2a)">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ec9b0" stroke-width="2" stroke-linecap="round">
-              <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
-            </svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ec9b0" stroke-width="2" stroke-linecap="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
           </div>
           <div class="proj-name">DevKit CLI</div>
           <div class="proj-desc">Zero-config TypeScript toolchain for modern Node.js projects</div>
         </a>
-
         <a href="#" class="proj-card" style="background:linear-gradient(160deg,#171720,#1a1528)">
-          <div class="proj-stats">
-            <span>↓ 11K/mo</span>
-            <span>★ 378</span>
-          </div>
+          <div class="proj-stats"><span>↓ 11K/mo</span><span>★ 378</span></div>
           <div class="proj-icon" style="background:linear-gradient(135deg,#1d1026,#271335)">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff6b9d" stroke-width="2" stroke-linecap="round">
-              <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/>
-            </svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff6b9d" stroke-width="2" stroke-linecap="round"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>
           </div>
           <div class="proj-name">Meshflow</div>
           <div class="proj-desc">Graph-based reactive state management for React &amp; Solid</div>
         </a>
-
         <a href="#" class="proj-card">
-          <div class="proj-stats">
-            <span>↓ 3.8K/mo</span>
-            <span>★ 145</span>
-          </div>
+          <div class="proj-stats"><span>↓ 3.8K/mo</span><span>★ 145</span></div>
           <div class="proj-icon" style="background:linear-gradient(135deg,#0e1c2e,#122033)">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round">
-              <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
-            </svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
           </div>
           <div class="proj-name">Snapschema</div>
           <div class="proj-desc">Fast TypeScript-first schema validation with zero runtime cost</div>
         </a>
-
       </div>
     </section>
 
-    <!-- WRITING -->
     <section id="writing" class="reveal-item">
       <div class="sec-head">
         <h2>Recent Writing</h2>
         <div class="sec-line"></div>
         <a href="#" class="sec-more">all posts →</a>
       </div>
-
       <ul class="post-list">
-        <li class="post-row">
-          <a href="#">Why I'm betting on the Edge Runtime in 2025</a>
-          <span class="post-dots"></span>
-          <span class="post-date">Mar 2025</span>
-        </li>
-        <li class="post-row">
-          <a href="#">The hidden cost of deep TypeScript generics</a>
-          <span class="post-dots"></span>
-          <span class="post-date">Feb 2025</span>
-        </li>
-        <li class="post-row">
-          <a href="#">Building a bundler from scratch: what I learned</a>
-          <span class="post-dots"></span>
-          <span class="post-date">Jan 2025</span>
-        </li>
-        <li class="post-row">
-          <a href="#">Rethinking monorepo tooling for 2025</a>
-          <span class="post-dots"></span>
-          <span class="post-date">Dec 2024</span>
-        </li>
-        <li class="post-row">
-          <a href="#">Effective patterns for async state in React</a>
-          <span class="post-dots"></span>
-          <span class="post-date">Nov 2024</span>
-        </li>
+        <li class="post-row"><a href="#">Why I'm betting on the Edge Runtime in 2025</a><span class="post-dots"></span><span class="post-date">Mar 2025</span></li>
+        <li class="post-row"><a href="#">The hidden cost of deep TypeScript generics</a><span class="post-dots"></span><span class="post-date">Feb 2025</span></li>
+        <li class="post-row"><a href="#">Building a bundler from scratch: what I learned</a><span class="post-dots"></span><span class="post-date">Jan 2025</span></li>
+        <li class="post-row"><a href="#">Rethinking monorepo tooling for 2025</a><span class="post-dots"></span><span class="post-date">Dec 2024</span></li>
+        <li class="post-row"><a href="#">Effective patterns for async state in React</a><span class="post-dots"></span><span class="post-date">Nov 2024</span></li>
       </ul>
     </section>
 
-    <!-- ABOUT -->
     <section id="about" class="reveal-item">
-      <div class="sec-head">
-        <h2>About</h2>
-        <div class="sec-line"></div>
-      </div>
-
+      <div class="sec-head"><h2>About</h2><div class="sec-line"></div></div>
       <div class="about-body">
-        <p>
-          I'm a software engineer focused on web infrastructure and developer experience.
-          Most of my work lives in the open-source ecosystem — build systems, schema validators,
-          and state management libraries that developers depend on every day.
-        </p>
-        <p>
-          I believe that great DX compounds quietly: small improvements in tooling create
-          outsized leverage across engineering teams over time. That's the layer I care most
-          about — the invisible scaffolding that makes everything else faster and more reliable.
-        </p>
-        <p>
-          Outside of code, I read papers on compilers and distributed systems, tinker with new
-          language runtimes, and chase the best ramen spot in whatever city I'm in.
-        </p>
+        <p>I'm a software engineer focused on web infrastructure and developer experience. Most of my work lives in the open-source ecosystem — build systems, schema validators, and state management libraries that developers depend on every day.</p>
+        <p>I believe that great DX compounds quietly: small improvements in tooling create outsized leverage across engineering teams over time. That's the layer I care most about — the invisible scaffolding that makes everything else faster and more reliable.</p>
+        <p>Outside of code, I read papers on compilers and distributed systems, tinker with new language runtimes, and chase the best ramen spot in whatever city I'm in.</p>
       </div>
     </section>
 
-    <!-- ELSEWHERE -->
     <section id="links" class="reveal-item">
-      <div class="sec-head">
-        <h2>Find Me</h2>
-        <div class="sec-line"></div>
-      </div>
-
+      <div class="sec-head"><h2>Find Me</h2><div class="sec-line"></div></div>
       <div class="chip-row">
         <a href="https://github.com/Emmit3" class="chip" target="_blank" rel="noopener">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
@@ -706,17 +253,8 @@
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 01-2.06 0L2 7"/></svg>
           Email
         </a>
-        <a href="#" class="chip" target="_blank" rel="noopener">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-          YouTube
-        </a>
-        <a href="#" class="chip" target="_blank" rel="noopener">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-          Dev.to
-        </a>
       </div>
     </section>
-
   </main>
 
   <footer>
@@ -726,349 +264,825 @@
   </footer>
 </div>
 
-
 <script>
-// ════════════════════════════════════════
-// ELEMENTS & STATE
-// ════════════════════════════════════════
-const intro       = document.getElementById('intro');
-const robotWrap   = document.getElementById('robot-wrap');
-const robotCanvas = document.getElementById('robot-canvas');
-const rc          = robotCanvas.getContext('2d');
-const povHud      = document.getElementById('pov-hud');
-const pCanvas     = document.getElementById('particle-canvas');
-const pc          = pCanvas.getContext('2d');
-const portfolio   = document.getElementById('portfolio');
+// ════════════════════════════════════════════════════════
+//  SETUP
+// ════════════════════════════════════════════════════════
+const cv  = document.getElementById('scene-canvas');
+const ctx = cv.getContext('2d');
+const portfolio = document.getElementById('portfolio');
+const skipBtn   = document.getElementById('skip-btn');
 
-let phase     = 'robot';
-let rTime     = 0;
-let prevNow   = null;
-let particles = [];
-
-const PALETTE = [
-  '#4ec9b0','#00d4ff','#ff6b9d','#ffd700',
-  '#a78bfa','#34d399','#f87171','#60a5fa','#fb923c'
-];
-
-function resizePC() {
-  pCanvas.width  = window.innerWidth;
-  pCanvas.height = window.innerHeight;
+let W, H;
+function resize() {
+  W = cv.width  = window.innerWidth;
+  H = cv.height = window.innerHeight;
 }
-resizePC();
-window.addEventListener('resize', resizePC);
+resize();
+window.addEventListener('resize', resize);
 
+// Phases: 'robot' → 'spin' → 'black' → 'cloud' → 'reform' → 'done'
+let phase     = 'robot';
+let T         = 0;
+let prevNow   = null;
+let phaseT    = 0;  // time within current phase
 
-// ════════════════════════════════════════
-// DRAW ROBOT
-// ════════════════════════════════════════
+// ════════════════════════════════════════════════════════
+//  PRE-GENERATED BACKGROUND ELEMENTS
+// ════════════════════════════════════════════════════════
+const bgDust = Array.from({ length: 90 }, () => ({
+  nx: Math.random(), ny: Math.random(),
+  r:  0.4 + Math.random() * 2.2,
+  a:  0.04 + Math.random() * 0.22,
+  f:  0.2  + Math.random() * 0.8,
+  ph: Math.random() * Math.PI * 2,
+  warm: Math.random() < 0.5
+}));
+
+const rainDrops = Array.from({ length: 140 }, () => ({
+  nx: Math.random(), ny: Math.random() * 1.2,
+  spd: (3.5 + Math.random() * 4) / 700,
+  len: (10  + Math.random() * 18) / 700,
+  sln: (1.5 + Math.random() * 2)  / 700
+}));
+
+// ════════════════════════════════════════════════════════
+//  CANVAS HELPERS
+// ════════════════════════════════════════════════════════
+function rr(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, r);
+}
+
+function lg(x1, y1, x2, y2, stops) {
+  const g = ctx.createLinearGradient(x1, y1, x2, y2);
+  stops.forEach(([t, c]) => g.addColorStop(t, c));
+  return g;
+}
+
+function rg(cx, cy, r0, r1, stops) {
+  const g = ctx.createRadialGradient(cx, cy, r0, cx, cy, r1);
+  stops.forEach(([t, c]) => g.addColorStop(t, c));
+  return g;
+}
+
+// ════════════════════════════════════════════════════════
+//  BACKGROUND (Blade Runner atmosphere)
+// ════════════════════════════════════════════════════════
+function drawBackground(t) {
+  // Sky
+  ctx.fillStyle = '#030308';
+  ctx.fillRect(0, 0, W, H);
+
+  // Orange key light (right, elevated)
+  ctx.fillStyle = rg(W * 0.76, H * 0.22, 0, W * 0.58, [
+    [0,   'rgba(255,130,20,0.13)'],
+    [0.5, 'rgba(200,70,10,0.05)'],
+    [1,   'transparent']
+  ]);
+  ctx.fillRect(0, 0, W, H);
+
+  // Secondary warm glow (mid-right)
+  ctx.fillStyle = rg(W * 0.65, H * 0.55, 0, W * 0.40, [
+    [0,   'rgba(255,80,10,0.08)'],
+    [1,   'transparent']
+  ]);
+  ctx.fillRect(0, 0, W, H);
+
+  // Cool teal rim light (left)
+  ctx.fillStyle = rg(0, H * 0.38, 0, W * 0.38, [
+    [0,   'rgba(0,210,220,0.07)'],
+    [1,   'transparent']
+  ]);
+  ctx.fillRect(0, 0, W, H);
+
+  // Distant haze band
+  const fogY = H * 0.52;
+  const fog = ctx.createLinearGradient(0, fogY - 50, 0, fogY + 90);
+  fog.addColorStop(0,   'transparent');
+  fog.addColorStop(0.45,'rgba(15,8,28,0.28)');
+  fog.addColorStop(1,   'transparent');
+  ctx.fillStyle = fog;
+  ctx.fillRect(0, fogY - 50, W, 140);
+
+  // Floating bokeh / dust
+  for (const p of bgDust) {
+    ctx.globalAlpha = p.a * (0.35 + 0.65 * Math.sin(t * p.f + p.ph));
+    ctx.fillStyle   = p.warm ? '#ff9944' : '#44aacc';
+    ctx.shadowColor = p.warm ? '#ff6600' : '#00aacc';
+    ctx.shadowBlur  = 6;
+    ctx.beginPath();
+    ctx.arc(
+      p.nx * W + Math.sin(t * 0.25 + p.ph) * 5,
+      p.ny * H + Math.cos(t * 0.20 + p.ph) * 4,
+      p.r, 0, Math.PI * 2
+    );
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  ctx.shadowBlur  = 0;
+
+  // ── FLOOR ──
+  const floorY = H * 0.73;
+
+  ctx.fillStyle = lg(0, floorY, 0, H, [
+    [0,   '#0d0a18'],
+    [0.4, '#080612'],
+    [1,   '#030208']
+  ]);
+  ctx.fillRect(0, floorY, W, H - floorY);
+
+  // Floor grid (perspective, orange tint)
+  const vpX = W * 0.52;
+  ctx.save();
+  ctx.globalAlpha = 0.10;
+  ctx.strokeStyle = '#ff8822';
+  ctx.lineWidth   = 0.6;
+  for (let i = -16; i <= 16; i++) {
+    ctx.beginPath();
+    ctx.moveTo(vpX, floorY);
+    ctx.lineTo(vpX + i * 95, H + 10);
+    ctx.stroke();
+  }
+  for (let row = 1; row <= 9; row++) {
+    const f  = row / 9;
+    const fy = floorY + (H - floorY) * (f * f);
+    const hw = 45 + f * 640;
+    ctx.beginPath();
+    ctx.moveTo(vpX - hw, fy);
+    ctx.lineTo(vpX + hw, fy);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Floor glow under robot
+  ctx.fillStyle = rg(W * 0.52, floorY + 8, 0, W * 0.30, [
+    [0,   'rgba(255,130,0,0.18)'],
+    [0.6, 'rgba(255,80,0,0.04)'],
+    [1,   'transparent']
+  ]);
+  ctx.fillRect(0, floorY, W, H - floorY);
+
+  // Rain
+  ctx.save();
+  ctx.globalAlpha = 0.065;
+  ctx.strokeStyle = '#aac8ff';
+  ctx.lineWidth   = 0.55;
+  for (const r of rainDrops) {
+    r.ny += r.spd;
+    if (r.ny > 1.08) r.ny = -0.06;
+    const rx = r.nx * W, ry = r.ny * H;
+    ctx.beginPath();
+    ctx.moveTo(rx, ry);
+    ctx.lineTo(rx - r.sln * W * 2, ry + r.len * H * 2);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// ════════════════════════════════════════════════════════
+//  ROBOT (Blade Runner 2049 style — round dome + orange visor)
+// ════════════════════════════════════════════════════════
 function drawRobot(t) {
-  const W  = robotCanvas.width;
-  const H  = robotCanvas.height;
-  const cx = W / 2;
-  const cy = H / 2;
+  const floorY = H * 0.73;
+  const S  = H / 860;          // scale factor
+  const bx = W * 0.52;         // robot base-x (feet)
+  const by = floorY;           // feet at floor
 
-  rc.clearRect(0, 0, W, H);
-  rc.lineCap  = 'round';
-  rc.lineJoin = 'round';
+  const breathe  = Math.sin(t * 0.88)  * 1.9 * S;
+  const visorP   = 0.68 + 0.32 * Math.sin(t * 2.4);   // visor pulse
+  const chestP   = 0.50 + 0.50 * Math.sin(t * 1.75);  // chest pulse
 
-  const breathe = Math.sin(t * 1.15) * 2.5;
-  const eyeBeat = (Math.sin(t * 3.6) + 1) / 2;
-  const arm     = Math.sin(t * 1.9)  * 10;
-  const leg     = Math.sin(t * 1.9 + .5) * 4;
+  // ── Floor shadow ──
+  ctx.save();
+  ctx.globalAlpha = 0.48;
+  ctx.fillStyle = rg(bx, by, 4, 95 * S, [
+    [0,   'rgba(0,0,0,0.75)'],
+    [1,   'transparent']
+  ]);
+  ctx.beginPath();
+  ctx.ellipse(bx, by, 92 * S, 20 * S, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
 
-  function sg(col, blur) {
-    rc.shadowColor = col;
-    rc.shadowBlur  = blur;
-    rc.strokeStyle = col;
-    rc.fillStyle   = col;
-  }
+  // ── RIGHT LEG (farther — drawn behind left) ──
+  const rLx   = bx + 28 * S;
+  const legTY = by - 158 * S;
 
-  // ── HEAD ──
-  sg('#4ec9b0', 9);
-  rc.lineWidth = 1.5;
-  rc.strokeRect(cx - 25, cy - 74 + breathe, 50, 40);
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.85)';
+  ctx.shadowBlur  = 10;
 
-  // Antenna
-  rc.beginPath();
-  rc.moveTo(cx, cy - 74 + breathe);
-  rc.lineTo(cx, cy - 90 + breathe);
-  rc.stroke();
-  rc.shadowBlur = 16;
-  rc.fillStyle  = `rgba(78,201,176,${.45 + eyeBeat * .55})`;
-  rc.beginPath();
-  rc.arc(cx, cy - 93 + breathe, 3.5, 0, Math.PI * 2);
-  rc.fill();
+  // Right upper leg
+  ctx.fillStyle = lg(rLx - 14*S, 0, rLx + 14*S, 0, [
+    [0, '#707078'], [0.5, '#aaaaB2'], [1, '#505058']
+  ]);
+  rr(rLx - 14*S, legTY + 4*S, 28*S, 62*S, 7*S);
+  ctx.fill();
 
-  // Eyes
-  rc.shadowBlur = 7 + eyeBeat * 15;
-  const ea = .35 + eyeBeat * .65;
-  rc.fillStyle = `rgba(78,201,176,${ea})`;
-  rc.fillRect(cx - 19, cy - 62 + breathe, 14, 9);
-  rc.fillRect(cx +  5, cy - 62 + breathe, 14, 9);
+  // Knee joint
+  ctx.fillStyle = '#1c1c24';
+  ctx.beginPath();
+  ctx.arc(rLx, legTY + 68*S, 9*S, 0, Math.PI * 2);
+  ctx.fill();
 
-  // LED mouth strip
-  rc.shadowBlur = 4;
-  for (let i = 0; i < 5; i++) {
-    const on = Math.floor(t * 5.5) % 5 === i ||
-               Math.floor(t * 5.5 + 2) % 5 === i;
-    rc.fillStyle = on
-      ? 'rgba(78,201,176,.95)'
-      : 'rgba(78,201,176,.12)';
-    rc.fillRect(cx - 15 + i * 8, cy - 45 + breathe, 5, 3);
-  }
+  // Right lower leg
+  ctx.fillStyle = lg(rLx - 12*S, 0, rLx + 12*S, 0, [
+    [0, '#191920'], [0.5, '#2a2a34'], [1, '#101018']
+  ]);
+  rr(rLx - 12*S, legTY + 74*S, 24*S, 46*S, 6*S);
+  ctx.fill();
 
-  // ── NECK ──
-  rc.shadowBlur = 0;
-  rc.lineWidth  = 8;
-  rc.strokeStyle = '#193328';
-  rc.beginPath();
-  rc.moveTo(cx, cy - 34 + breathe);
-  rc.lineTo(cx, cy - 21);
-  rc.stroke();
+  // Right boot
+  ctx.fillStyle = lg(rLx - 17*S, 0, rLx + 24*S, 0, [
+    [0, '#18181e'], [0.5, '#2e2e3a'], [1, '#101018']
+  ]);
+  rr(rLx - 18*S, legTY + 118*S, 42*S, 46*S, 9*S);
+  ctx.fill();
 
-  sg('#4ec9b0', 3);
-  rc.lineWidth = 1;
-  rc.beginPath();
-  rc.moveTo(cx - 5, cy - 34 + breathe); rc.lineTo(cx - 5, cy - 21);
-  rc.moveTo(cx + 5, cy - 34 + breathe); rc.lineTo(cx + 5, cy - 21);
-  rc.stroke();
+  // Right boot orange strip
+  ctx.globalAlpha = 0.68;
+  ctx.fillStyle   = '#ff8800';
+  ctx.shadowColor = '#ff8800';
+  ctx.shadowBlur  = 8;
+  ctx.fillRect(rLx - 16*S, legTY + 156*S, 38*S, 3.5*S);
+  ctx.restore();
+
+  // ── LEFT LEG (closer) ──
+  const lLx = bx - 30 * S;
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.8)';
+  ctx.shadowBlur  = 14;
+
+  // Left upper leg
+  ctx.fillStyle = lg(lLx - 17*S, 0, lLx + 19*S, 0, [
+    [0, '#b0b0b8'], [0.45, '#d8d8e2'], [1, '#888890']
+  ]);
+  rr(lLx - 17*S, legTY, 36*S, 66*S, 9*S);
+  ctx.fill();
+
+  // Knee joint
+  ctx.fillStyle = '#24242c';
+  ctx.beginPath();
+  ctx.arc(lLx, legTY + 68*S, 10*S, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Left lower leg
+  ctx.fillStyle = lg(lLx - 14*S, 0, lLx + 14*S, 0, [
+    [0, '#1e1e28'], [0.5, '#363644'], [1, '#141420']
+  ]);
+  rr(lLx - 14*S, legTY + 74*S, 28*S, 48*S, 7*S);
+  ctx.fill();
+
+  // Left boot
+  ctx.fillStyle = lg(lLx - 22*S, 0, lLx + 28*S, 0, [
+    [0, '#20202c'], [0.4, '#38384a'], [1, '#16161e']
+  ]);
+  rr(lLx - 23*S, legTY + 120*S, 50*S, 48*S, 11*S);
+  ctx.fill();
+
+  // Left boot orange strip
+  ctx.fillStyle   = '#ff8800';
+  ctx.shadowColor = '#ff9900';
+  ctx.shadowBlur  = 14;
+  ctx.fillRect(lLx - 21*S, legTY + 160*S, 46*S, 4.5*S);
+  ctx.restore();
 
   // ── TORSO ──
-  sg('#4ec9b0', 7);
-  rc.lineWidth = 1.5;
-  rc.strokeRect(cx - 31, cy - 21, 62, 56);
+  const torsoX = bx + 2 * S;
+  const torsoY = by - 330 * S + breathe;
+  const TW     = 118 * S;
+  const TH     = 168 * S;
 
-  rc.lineWidth  = 1;
-  rc.strokeStyle = 'rgba(78,201,176,.3)';
-  rc.shadowBlur  = 0;
-  rc.strokeRect(cx - 18, cy - 12, 36, 24);
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.85)';
+  ctx.shadowBlur  = 22;
 
-  // Chest light
-  const cp = (Math.sin(t * 2.3) + 1) / 2;
-  rc.fillStyle   = `rgba(78,201,176,${.2 + cp * .5})`;
-  rc.shadowColor = '#4ec9b0';
-  rc.shadowBlur  = 8 + cp * 14;
-  rc.beginPath();
-  rc.arc(cx, cy, 5.5, 0, Math.PI * 2);
-  rc.fill();
+  // Main torso
+  ctx.fillStyle = lg(torsoX - TW/2, 0, torsoX + TW/2, 0, [
+    [0,    '#a8a8b0'],
+    [0.3,  '#d5d5de'],
+    [0.55, '#e2e2ea'],
+    [0.8,  '#c8c8d0'],
+    [1,    '#787880']
+  ]);
+  rr(torsoX - TW/2, torsoY, TW, TH, 14*S);
+  ctx.fill();
 
-  // ── ARMS ──
-  sg('#4ec9b0', 5);
-  rc.lineWidth = 1.5;
+  // Chest panel inset
+  ctx.globalAlpha = 0.22;
+  ctx.strokeStyle = '#909098';
+  ctx.lineWidth   = 1.5 * S;
+  rr(torsoX - 36*S, torsoY + 12*S, 72*S, 62*S, 6*S);
+  ctx.stroke();
 
-  rc.beginPath(); // left
-  rc.moveTo(cx - 31, cy - 15);
-  rc.lineTo(cx - 49, cy + 8 + arm);
-  rc.lineTo(cx - 55, cy + 26 + arm * .55);
-  rc.stroke();
-  rc.beginPath();
-  rc.arc(cx - 57, cy + 28 + arm * .55, 4, 0, Math.PI * 2);
-  rc.stroke();
+  // Horizontal torso seam
+  ctx.globalAlpha = 0.18;
+  ctx.beginPath();
+  ctx.moveTo(torsoX - TW/2 + 12*S, torsoY + 82*S);
+  ctx.lineTo(torsoX + TW/2 - 12*S, torsoY + 82*S);
+  ctx.stroke();
+  ctx.restore();
 
-  rc.beginPath(); // right
-  rc.moveTo(cx + 31, cy - 15);
-  rc.lineTo(cx + 49, cy + 8 - arm);
-  rc.lineTo(cx + 55, cy + 26 - arm * .55);
-  rc.stroke();
-  rc.beginPath();
-  rc.arc(cx + 57, cy + 28 - arm * .55, 4, 0, Math.PI * 2);
-  rc.stroke();
+  // Chest center orb
+  ctx.save();
+  ctx.fillStyle   = rg(torsoX, torsoY + 34*S, 0, 20*S, [
+    [0,   `rgba(255,170,30,${0.85 + chestP * 0.15})`],
+    [0.4, `rgba(255,100,10,${0.35 + chestP * 0.25})`],
+    [1,   'transparent']
+  ]);
+  ctx.shadowColor = '#ff9900';
+  ctx.shadowBlur  = 28 + chestP * 22;
+  ctx.beginPath();
+  ctx.arc(torsoX, torsoY + 34*S, 10*S, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
 
-  // ── HIP ──
-  rc.beginPath();
-  rc.moveTo(cx - 31, cy + 35);
-  rc.lineTo(cx + 31, cy + 35);
-  rc.stroke();
+  // Torso bottom orange accent strip
+  ctx.save();
+  ctx.fillStyle   = '#ff8800';
+  ctx.shadowColor = '#ff9900';
+  ctx.shadowBlur  = 16 + visorP * 12;
+  ctx.fillRect(torsoX - 46*S, torsoY + TH - 8*S, 92*S, 5*S);
+  ctx.restore();
 
-  // ── LEGS ──
-  rc.beginPath(); // left
-  rc.moveTo(cx - 15, cy + 35);
-  rc.lineTo(cx - 18 + leg, cy + 60);
-  rc.lineTo(cx - 23 + leg, cy + 82);
-  rc.stroke();
-  rc.beginPath();
-  rc.moveTo(cx - 29 + leg, cy + 82);
-  rc.lineTo(cx - 13 + leg, cy + 82);
-  rc.stroke();
+  // ── LEFT SHOULDER PAD (closer) ──
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.7)';
+  ctx.shadowBlur  = 12;
+  ctx.fillStyle = lg(torsoX - TW/2 - 14*S, 0, torsoX - TW/2 + 28*S, 0, [
+    [0, '#c8c8d0'], [0.5, '#e6e6ee'], [1, '#b0b0b8']
+  ]);
+  rr(torsoX - TW/2 - 14*S, torsoY - 5*S, 40*S, 27*S, 11*S);
+  ctx.fill();
+  ctx.restore();
 
-  rc.beginPath(); // right
-  rc.moveTo(cx + 15, cy + 35);
-  rc.lineTo(cx + 18 - leg, cy + 60);
-  rc.lineTo(cx + 23 - leg, cy + 82);
-  rc.stroke();
-  rc.beginPath();
-  rc.moveTo(cx + 13 - leg, cy + 82);
-  rc.lineTo(cx + 29 - leg, cy + 82);
-  rc.stroke();
+  // ── RIGHT SHOULDER PAD (farther) ──
+  ctx.save();
+  ctx.globalAlpha = 0.80;
+  ctx.shadowBlur  = 7;
+  ctx.fillStyle = lg(torsoX + TW/2 - 18*S, 0, torsoX + TW/2 + 18*S, 0, [
+    [0, '#888890'], [0.5, '#b0b0b8'], [1, '#686870']
+  ]);
+  rr(torsoX + TW/2 - 18*S, torsoY - 3*S, 35*S, 24*S, 10*S);
+  ctx.fill();
+  ctx.restore();
 
-  rc.shadowBlur = 0;
+  // ── RIGHT ARM (farther — drawn first) ──
+  const rAx   = torsoX + 67 * S;
+  const armTY = torsoY + 14 * S;
+
+  ctx.save();
+  ctx.globalAlpha = 0.76;
+  ctx.shadowBlur  = 7;
+
+  ctx.fillStyle = lg(rAx - 12*S, 0, rAx + 12*S, 0, [
+    [0, '#6e6e76'], [0.5, '#9e9ea6'], [1, '#525258']
+  ]);
+  rr(rAx - 12*S, armTY, 24*S, 72*S, 10*S);
+  ctx.fill();
+
+  ctx.fillStyle = lg(rAx - 11*S, 0, rAx + 11*S, 0, [
+    [0, '#141420'], [0.5, '#222230'], [1, '#0e0e1a']
+  ]);
+  rr(rAx - 11*S, armTY + 74*S, 22*S, 54*S, 7*S);
+  ctx.fill();
+
+  ctx.fillStyle = '#1a1a26';
+  ctx.beginPath();
+  ctx.arc(rAx, armTY + 138*S, 13*S, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // ── LEFT ARM (closer) ──
+  const lAx = torsoX - 68 * S;
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.75)';
+  ctx.shadowBlur  = 12;
+
+  ctx.fillStyle = lg(lAx - 16*S, 0, lAx + 16*S, 0, [
+    [0, '#adadb5'], [0.45, '#d5d5de'], [1, '#7c7c84']
+  ]);
+  rr(lAx - 15*S, armTY, 30*S, 75*S, 10*S);
+  ctx.fill();
+
+  ctx.fillStyle = lg(lAx - 13*S, 0, lAx + 13*S, 0, [
+    [0, '#1c1c28'], [0.5, '#303042'], [1, '#121220']
+  ]);
+  rr(lAx - 13*S, armTY + 77*S, 26*S, 57*S, 8*S);
+  ctx.fill();
+
+  ctx.fillStyle = '#222232';
+  ctx.beginPath();
+  ctx.arc(lAx, armTY + 145*S, 15*S, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // ── HEAD ──
+  const hcx = bx + 6 * S;
+  const hcy = by - 490 * S + breathe;
+  const HR  = 82 * S;  // head sphere radius
+
+  // Neck
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.9)';
+  ctx.shadowBlur  = 8;
+  ctx.fillStyle = lg(hcx - 13*S, 0, hcx + 13*S, 0, [
+    [0, '#18181e'], [0.5, '#2c2c36'], [1, '#10101a']
+  ]);
+  rr(hcx - 12*S, hcy + HR - 4*S, 24*S, 34*S, 5*S);
+  ctx.fill();
+  ctx.restore();
+
+  // Main dome — spherical gradient for 3D feel
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.9)';
+  ctx.shadowBlur  = 30;
+  ctx.fillStyle = rg(
+    hcx - HR * 0.38, hcy - HR * 0.32, HR * 0.04, HR * 1.12, [
+    [0,    '#ebebf3'],
+    [0.35, '#d2d2da'],
+    [0.70, '#a8a8b0'],
+    [1,    '#6a6a72']
+  ]);
+  ctx.beginPath();
+  ctx.arc(hcx, hcy, HR, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Dome panel seam (subtle arc)
+  ctx.globalAlpha = 0.12;
+  ctx.strokeStyle = '#5a5a64';
+  ctx.lineWidth   = 1.5 * S;
+  ctx.beginPath();
+  ctx.arc(hcx + 4*S, hcy, HR * 0.82, Math.PI * 0.05, Math.PI * 0.95);
+  ctx.stroke();
+  ctx.restore();
+
+  // ── VISOR — the signature orange glowing band ──
+  const visorY  = hcy + 4 * S;
+  const visorRx = HR * 0.90;
+  const visorRy = HR * 0.24;
+
+  // Visor socket (deep dark recess)
+  ctx.save();
+  ctx.fillStyle   = '#040206';
+  ctx.shadowBlur  = 0;
+  ctx.beginPath();
+  ctx.ellipse(hcx, visorY, visorRx + 1*S, visorRy + 1*S, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // Visor inner glow gradient
+  ctx.save();
+  const vg = ctx.createLinearGradient(hcx - visorRx, visorY, hcx + visorRx, visorY);
+  vg.addColorStop(0,    `rgba(180,60,0,${0.22 * visorP})`);
+  vg.addColorStop(0.15, `rgba(255,130,15,${0.82 * visorP})`);
+  vg.addColorStop(0.32, `rgba(255,195,50,${visorP})`);
+  vg.addColorStop(0.50, `rgba(255,215,70,${visorP})`);
+  vg.addColorStop(0.68, `rgba(255,195,50,${visorP})`);
+  vg.addColorStop(0.85, `rgba(255,130,15,${0.82 * visorP})`);
+  vg.addColorStop(1,    `rgba(180,60,0,${0.22 * visorP})`);
+  ctx.fillStyle   = vg;
+  ctx.shadowColor = '#ff9900';
+  ctx.shadowBlur  = 36 + visorP * 28;
+  ctx.beginPath();
+  ctx.ellipse(hcx, visorY, visorRx * 0.92, visorRy * 0.85, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // Visor outer rim
+  ctx.save();
+  ctx.strokeStyle = `rgba(255,165,45,${0.5 + visorP * 0.5})`;
+  ctx.lineWidth   = 2.5 * S;
+  ctx.shadowColor = '#ff9900';
+  ctx.shadowBlur  = 20;
+  ctx.beginPath();
+  ctx.ellipse(hcx, visorY, visorRx, visorRy, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+
+  // Visor specular highlight
+  ctx.save();
+  ctx.globalAlpha = 0.22;
+  ctx.fillStyle   = 'rgba(255,250,220,0.7)';
+  ctx.beginPath();
+  ctx.ellipse(hcx - visorRx * 0.22, visorY - visorRy * 0.42,
+    visorRx * 0.28, visorRy * 0.22, -0.18, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // Visor orange bounce-light on dome face
+  ctx.save();
+  ctx.globalAlpha = 0.09 + visorP * 0.05;
+  ctx.fillStyle = rg(hcx, visorY, 4, HR * 1.1, [
+    [0,   'rgba(255,145,20,0.55)'],
+    [0.4, 'rgba(255,80,10,0.12)'],
+    [1,   'transparent']
+  ]);
+  ctx.beginPath();
+  ctx.arc(hcx, hcy, HR, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // Ear pieces
+  ctx.save();
+  ctx.fillStyle   = '#1e1e28';
+  ctx.shadowColor = 'rgba(0,0,0,0.9)';
+  ctx.shadowBlur  = 10;
+  ctx.beginPath();
+  ctx.arc(hcx - HR * 0.97, hcy, 12 * S, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 0.72;
+  ctx.beginPath();
+  ctx.arc(hcx + HR * 0.97, hcy, 11 * S, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // ── Whole-robot warm key light (from right) ──
+  ctx.save();
+  ctx.globalAlpha = 0.065;
+  ctx.fillStyle = rg(torsoX + 90*S, torsoY + 45*S, 10, 240*S, [
+    [0,   'rgba(255,140,30,0.5)'],
+    [0.6, 'rgba(200,80,10,0.1)'],
+    [1,   'transparent']
+  ]);
+  ctx.fillRect(torsoX - 220*S, torsoY - 220*S, 520*S, 620*S);
+  ctx.restore();
 }
 
+// ════════════════════════════════════════════════════════
+//  POINT CLOUD (dense LiDAR-style, depth-colored)
+// ════════════════════════════════════════════════════════
+const CLOUD_N = 7500;
+const cloud = [];
 
-// ════════════════════════════════════════
-// PARTICLE SYSTEM
-// ════════════════════════════════════════
-class Dot {
-  constructor() {
-    const cx  = window.innerWidth  / 2;
-    const cy  = window.innerHeight / 2;
-    const ang = Math.random() * Math.PI * 2;
-    const spd = 2 + Math.random() * 14;
+// We'll initialise lazily when transitioning to 'cloud' phase
+function initCloud() {
+  cloud.length = 0;
+  for (let i = 0; i < CLOUD_N; i++) {
+    // 3D coordinates: x, y spread over scene; z = depth (1=near … 8=far)
+    const z  = 1 + Math.random() * 7;
+    const nx = (Math.random() - 0.5) * 2.4;
+    const ny = (Math.random() - 0.7) * 2.0;
 
-    this.x    = cx;
-    this.y    = cy;
-    this.vx   = Math.cos(ang) * spd;
-    this.vy   = Math.sin(ang) * spd;
-    this.col  = PALETTE[Math.floor(Math.random() * PALETTE.length)];
-    this.r    = .6 + Math.random() * 3;
-    this.life = .75 + Math.random() * .25;
-    this.dec  = .0035 + Math.random() * .008;
-    this.trail = [];
+    // Depth-based color (matching LiDAR reference):
+    //  near (z<2.5) → teal/cyan
+    //  mid  (z<5)   → green/yellow-green
+    //  far          → magenta/pink
+    let col;
+    if      (z < 2.5) col = `hsl(${170 + nx*20},100%,${52 + Math.random()*18}%)`;
+    else if (z < 5.0) col = `hsl(${95  + ny*15},100%,${48 + Math.random()*20}%)`;
+    else              col = `hsl(${305 + nx*25},100%,${50 + Math.random()*20}%)`;
+
+    cloud.push({
+      ox: nx, oy: ny, z,  // original
+      x: nx, y: ny,       // current (animated)
+      col,
+      // target: set later during 'reform' phase
+      tx: nx, ty: ny,
+      // scatter velocity
+      vx: (Math.random() - 0.5) * 0.008,
+      vy: (Math.random() - 0.5) * 0.006,
+      // size modifier
+      sr: 0.4 + Math.random() * 0.8,
+      // reform weight (each point moves slightly differently)
+      speed: 0.04 + Math.random() * 0.06
+    });
   }
+}
 
-  tick() {
-    this.trail.push({ x: this.x, y: this.y });
-    if (this.trail.length > 9) this.trail.shift();
-    this.x  += this.vx;
-    this.y  += this.vy;
-    this.vx *= .974;
-    this.vy *= .974;
-    this.life -= this.dec;
-  }
+function buildReformTargets() {
+  // Map cloud points to website element regions
+  // Regions defined as normalised (nx,ny) in [-1.2..1.2, -1.0..0.7]
+  // matching what the cloud covers
+  const regions = [
+    // Nav bar (top strip)
+    { nx: 0, ny: -0.88, sx: 2.2, sy: 0.06, weight: 0.06 },
+    // Hero "Hello, I'm Edmund" (large text, left half)
+    { nx: -0.5, ny: -0.58, sx: 0.9, sy: 0.18, weight: 0.12 },
+    // Hero bio text
+    { nx: -0.5, ny: -0.32, sx: 0.85, sy: 0.16, weight: 0.08 },
+    // Headshot frame (right side hero)
+    { nx: 0.52, ny: -0.52, sx: 0.28, sy: 0.32, weight: 0.06 },
+    // Project card 1
+    { nx: -0.55, ny: 0.10, sx: 0.28, sy: 0.30, weight: 0.12 },
+    // Project card 2
+    { nx: 0.02,  ny: 0.10, sx: 0.28, sy: 0.30, weight: 0.12 },
+    // Project card 3
+    { nx: 0.58,  ny: 0.10, sx: 0.28, sy: 0.30, weight: 0.12 },
+    // Writing list
+    { nx: -0.1,  ny: 0.55, sx: 1.1,  sy: 0.28, weight: 0.10 },
+    // About section
+    { nx: -0.1,  ny: 0.82, sx: 1.0,  sy: 0.22, weight: 0.08 },
+    // Footer
+    { nx: 0, ny: 0.96, sx: 2.0, sy: 0.04, weight: 0.04 },
+  ];
 
-  draw(ctx) {
-    for (let i = 0; i < this.trail.length; i++) {
-      const f = i / this.trail.length;
-      ctx.globalAlpha = f * this.life * .3;
-      ctx.fillStyle   = this.col;
-      ctx.beginPath();
-      ctx.arc(this.trail[i].x, this.trail[i].y, this.r * f, 0, Math.PI * 2);
-      ctx.fill();
+  // Normalize weights
+  const total = regions.reduce((s, r) => s + r.weight, 0);
+  const cumWeights = [];
+  let cum = 0;
+  for (const r of regions) { cum += r.weight / total; cumWeights.push(cum); }
+
+  for (const p of cloud) {
+    // Pick a target region probabilistically
+    const rv = Math.random();
+    let ri = 0;
+    for (let k = 0; k < cumWeights.length; k++) {
+      if (rv < cumWeights[k]) { ri = k; break; }
     }
-    ctx.globalAlpha    = this.life;
-    ctx.fillStyle      = this.col;
-    ctx.shadowColor    = this.col;
-    ctx.shadowBlur     = 5;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
+    const reg = regions[ri];
+    p.tx = reg.nx + (Math.random() - 0.5) * reg.sx;
+    p.ty = reg.ny + (Math.random() - 0.5) * reg.sy;
   }
-
-  dead() { return this.life <= 0; }
 }
 
-function burst() {
-  const spawn = (n) => { for (let i = 0; i < n; i++) particles.push(new Dot()); };
-  spawn(720);
-  setTimeout(() => spawn(280), 170);
-  setTimeout(() => spawn(180), 360);
+function drawCloud(t, reformProgress /* 0=scatter, 1=fully reformed */) {
+  const CX = W / 2;
+  const CY = H / 2;
+  const FOV = H * 0.65;
+
+  for (const p of cloud) {
+    // During reform, lerp each point toward its target
+    if (reformProgress > 0) {
+      const sp = p.speed * reformProgress;
+      p.x += (p.tx - p.x) * sp;
+      p.y += (p.ty - p.y) * sp;
+    } else {
+      // Float gently
+      p.x += p.vx; p.y += p.vy;
+      if (Math.abs(p.x) > 1.4) p.vx *= -1;
+      if (Math.abs(p.y) > 1.1) p.vy *= -1;
+    }
+
+    // Perspective project
+    const z   = p.z;
+    const sx  = CX + p.x * FOV / z;
+    const sy  = CY + p.y * FOV / z;
+    const rad = (p.sr * 1.1) / (z * 0.6);
+
+    if (sx < -2 || sx > W + 2 || sy < -2 || sy > H + 2) continue;
+
+    ctx.globalAlpha = Math.min(1, (0.55 + 0.45 * (1 - z / 8)));
+    ctx.fillStyle   = p.col;
+    ctx.shadowColor = p.col;
+    ctx.shadowBlur  = z < 3 ? 3 : 1;
+    ctx.beginPath();
+    ctx.arc(sx, sy, Math.max(0.4, rad), 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  ctx.shadowBlur  = 0;
 }
 
-
-// ════════════════════════════════════════
-// TRANSITIONS
-// ════════════════════════════════════════
-let zoomTimer = null;
-
-function doZoom() {
-  phase = 'zooming';
-  robotCanvas.classList.add('zoom-in');
-
-  setTimeout(() => {
-    robotCanvas.classList.add('fade-out');
-    setTimeout(() => {
-      robotWrap.style.display = 'none';
-      povHud.classList.add('active');
-      phase = 'pov';
-    }, 420);
-  }, 1900);
-}
-
-function revealPortfolio(withParticles) {
-  // Hide the whole intro overlay
-  intro.style.transition = 'opacity .35s';
-  intro.style.opacity    = '0';
-  setTimeout(() => { intro.style.display = 'none'; }, 350);
-
-  // Hide skip button
+// ════════════════════════════════════════════════════════
+//  PORTFOLIO REVEAL
+// ════════════════════════════════════════════════════════
+function revealPortfolio() {
+  portfolio.style.display = 'block';
+  document.body.style.background = 'var(--bg)';
+  document.body.style.overflow   = 'auto';
   skipBtn.style.display = 'none';
 
-  // Reveal portfolio
-  portfolio.style.display = 'block';
-  document.body.style.overflow = 'auto';
-
-  if (withParticles) {
-    phase = 'exploding';
-    burst();
-  } else {
-    phase = 'done';
-  }
-
-  // Stagger-reveal portfolio sections
   const items = document.querySelectorAll('.reveal-item');
   items.forEach((el, i) => {
-    setTimeout(() => el.classList.add('in'), 80 + i * 160);
+    setTimeout(() => el.classList.add('in'), 60 + i * 150);
   });
 }
 
-function doExplode() {
-  if (phase !== 'pov') return;
+// ════════════════════════════════════════════════════════
+//  MAIN LOOP
+// ════════════════════════════════════════════════════════
+let spinStart  = 0;
+let blackStart = 0;
+let cloudStart = 0;
+let reformStart = 0;
+let cvAlpha     = 1;
 
-  povHud.style.transition = 'opacity .18s';
-  povHud.style.opacity    = '0';
-  setTimeout(() => revealPortfolio(true), 200);
-}
-
-function doSkip() {
-  if (phase === 'done') return;
-  if (zoomTimer) clearTimeout(zoomTimer);
-  // Cancel any in-progress zoom animation
-  robotCanvas.style.transition = 'none';
-  revealPortfolio(false);
-}
-
-
-// ════════════════════════════════════════
-// MAIN LOOP
-// ════════════════════════════════════════
 function loop(now) {
   if (!prevNow) prevNow = now;
   const dt = Math.min((now - prevNow) / 1000, 0.05);
   prevNow  = now;
-  rTime   += dt;
+  T       += dt;
+  phaseT  += dt;
 
-  if (phase === 'robot' || phase === 'zooming') {
-    drawRobot(rTime);
-  }
+  // ── ROBOT SCENE ──────────────────────────────
+  if (phase === 'robot') {
+    ctx.clearRect(0, 0, W, H);
+    drawBackground(T);
+    drawRobot(T);
 
-  if (phase === 'exploding') {
-    pc.clearRect(0, 0, pCanvas.width, pCanvas.height);
-    particles = particles.filter(p => !p.dead());
-    for (const p of particles) { p.tick(); p.draw(pc); }
-    pc.globalAlpha = 1;
-    pc.shadowBlur  = 0;
-    // When all particles are gone, stop drawing on the canvas
-    if (particles.length === 0) {
-      phase = 'done';
-      pc.clearRect(0, 0, pCanvas.width, pCanvas.height);
+    // After 5s → start spin
+    if (phaseT > 5.0) {
+      phase     = 'spin';
+      spinStart = T;
+      phaseT    = 0;
     }
   }
 
-  requestAnimationFrame(loop);
+  // ── SPIN TRANSITION ──────────────────────────
+  if (phase === 'spin') {
+    const prog = Math.min(1, phaseT / 2.0); // 2s spin
+    const angle = prog * Math.PI * 2;        // 360 deg
+    const sc    = 1 - prog * 0.9;            // zoom down to 0.1×
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.save();
+    ctx.translate(W / 2, H / 2);
+    ctx.rotate(angle);
+    ctx.scale(sc, sc);
+    ctx.translate(-W / 2, -H / 2);
+    drawBackground(T);
+    drawRobot(T);
+    ctx.restore();
+
+    // Fade to black in second half
+    if (prog > 0.45) {
+      const bk = (prog - 0.45) / 0.55;
+      ctx.fillStyle = `rgba(0,0,0,${bk * bk})`;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    if (prog >= 1) {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, W, H);
+      phase     = 'black';
+      blackStart = T;
+      phaseT    = 0;
+    }
+  }
+
+  // ── BLACK HOLD ────────────────────────────────
+  if (phase === 'black') {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, W, H);
+
+    if (phaseT > 0.55) {
+      initCloud();
+      phase     = 'cloud';
+      cloudStart = T;
+      phaseT    = 0;
+    }
+  }
+
+  // ── POINT CLOUD ───────────────────────────────
+  if (phase === 'cloud') {
+    // Fade from black
+    const fadeIn = Math.min(1, phaseT / 0.8);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalAlpha = fadeIn;
+    drawCloud(T, 0);
+    ctx.globalAlpha = 1;
+
+    if (phaseT > 3.2) {
+      // Build targets and start reforming
+      buildReformTargets();
+      // Show portfolio underneath (transparent) so points can converge to it
+      revealPortfolio();
+      phase      = 'reform';
+      reformStart = T;
+      phaseT     = 0;
+    }
+  }
+
+  // ── REFORM (points fly to website layout) ─────
+  if (phase === 'reform') {
+    const prog = Math.min(1, phaseT / 2.5);
+
+    // Darken background to the portfolio bg colour
+    ctx.fillStyle = `rgba(15,15,15,${prog * prog * 0.85})`;
+    ctx.fillRect(0, 0, W, H);
+
+    // Point cloud with reform progress
+    ctx.globalAlpha = Math.max(0, 1 - prog * prog);
+    if (ctx.globalAlpha > 0.01) drawCloud(T, prog * 0.6);
+    ctx.globalAlpha = 1;
+
+    // Canvas overlay fades out as portfolio reveals
+    cvAlpha = 1 - prog * prog;
+    cv.style.opacity = cvAlpha;
+
+    if (prog >= 1) {
+      cv.style.display = 'none';
+      phase = 'done';
+    }
+  }
+
+  if (phase !== 'done') requestAnimationFrame(loop);
 }
 
-
-// ════════════════════════════════════════
-// BOOT
-// ════════════════════════════════════════
-const skipBtn = document.getElementById('skip-btn');
-
-povHud.addEventListener('click', doExplode);
-skipBtn.addEventListener('click', doSkip);
+// ── SKIP ──────────────────────────────────────
+skipBtn.addEventListener('click', () => {
+  if (phase === 'done') return;
+  phase = 'done';
+  cv.style.display = 'none';
+  revealPortfolio();
+});
 
 requestAnimationFrame(loop);
-zoomTimer = setTimeout(doZoom, 3300);
 </script>
 </body>
 </html>
