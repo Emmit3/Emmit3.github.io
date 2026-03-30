@@ -3,19 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edmund</title>
+  <title>Edmund Tong</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --bg: #0f0f0f; --card: #181818; --border: #252525;
-      --accent: #4ec9b0; --pink: #ff6b9d; --blue: #60a5fa;
-      --text: #e8e8e8; --muted: #6e6e6e;
-      --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      --mono: 'JetBrains Mono', ui-monospace, monospace;
+      --bg:     #1a1510;
+      --card:   #221e18;
+      --border: #3a342c;
+      --accent: #5a7a5c;
+      --text:   #ede8e0;
+      --muted:  #9a8f84;
+      --font:   'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --serif:  'Playfair Display', Georgia, serif;
+      --mono:   'JetBrains Mono', ui-monospace, monospace;
     }
 
     html { scroll-behavior: smooth; }
@@ -30,45 +34,51 @@
 
     /* ── INTRO CANVAS ── */
     #scene-canvas {
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      display: block;
+      position: fixed; inset: 0;
+      z-index: 1000; display: block;
+      cursor: pointer;
     }
 
     /* ── SKIP ── */
     #skip-btn {
-      position: fixed;
-      bottom: 28px; right: 28px;
-      z-index: 1002;
-      font-family: var(--mono);
-      font-size: 9px;
-      letter-spacing: 3px;
-      color: rgba(255,140,30,.3);
-      text-transform: uppercase;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 8px 0;
-      transition: color .2s;
+      position: fixed; bottom: 28px; right: 28px;
+      z-index: 1002; font-family: var(--mono); font-size: 9px;
+      letter-spacing: 3px; color: rgba(255,255,255,.2);
+      text-transform: uppercase; background: none; border: none;
+      cursor: pointer; padding: 8px 0; transition: color .2s;
     }
-    #skip-btn:hover { color: rgba(255,140,30,.75); }
+    #skip-btn:hover { color: rgba(255,255,255,.55); }
+
+    /* ── THREE.JS DOTTED BG ── */
+    #three-bg {
+      position: fixed; inset: 0;
+      z-index: 999; display: none;
+      pointer-events: none;
+    }
 
     /* ── PORTFOLIO ── */
     #portfolio { display: none; }
 
+    /* ── PROGRESS BAR ── */
+    #progress-bar {
+      position: fixed; top: 0; left: 0; height: 2px; width: 0%;
+      background: linear-gradient(90deg, var(--accent) 0%, #8aaa8c 100%);
+      z-index: 200; pointer-events: none;
+    }
+
+    /* ── NAV ── */
     nav {
       position: sticky; top: 0; z-index: 50;
       padding: 18px max(24px, calc((100vw - 720px) / 2));
       display: flex; align-items: center; justify-content: space-between; gap: 32px;
-      background: rgba(15,15,15,.88);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+      background: rgba(26,21,16,.88);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
     }
-    .nav-brand { font-size: 15px; font-weight: 600; color: var(--text); text-decoration: none; letter-spacing: -.02em; }
+    .nav-brand { font-size: 15px; font-weight: 600; color: var(--text); text-decoration: none; letter-spacing: -.02em; font-family: var(--serif); }
     nav ul { list-style: none; display: flex; gap: 22px; }
     nav a { color: var(--muted); text-decoration: none; font-size: 14px; transition: color .18s; }
-    nav a:hover { color: var(--text); }
+    nav a:hover, nav a.active { color: var(--text); }
     .nav-icons { display: flex; gap: 20px; }
 
     main { max-width: 720px; margin: 0 auto; padding: 60px 24px 96px; }
@@ -76,10 +86,11 @@
     .reveal-item { opacity: 0; transform: translateY(22px); transition: opacity .55s ease, transform .55s ease; }
     .reveal-item.in { opacity: 1; transform: translateY(0); }
 
+    /* ── HERO ── */
     .hero { display: flex; justify-content: space-between; align-items: flex-start; gap: 36px; margin-bottom: 72px; }
     .hero-left { flex: 1; }
-    .hero-hello { font-size: 21px; color: var(--muted); font-weight: 400; margin-bottom: 2px; }
-    h1.hero-name { font-size: 50px; font-weight: 700; letter-spacing: -.04em; line-height: 1.05; margin-bottom: 22px; }
+    .hero-hello { font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--muted); font-weight: 400; margin-bottom: 2px; }
+    h1.hero-name { font-family: var(--serif); font-size: 52px; font-weight: 700; letter-spacing: -.02em; line-height: 1.05; margin-bottom: 22px; color: var(--text); }
     .hero-bio { font-size: 15px; line-height: 1.78; color: var(--muted); }
     .hero-bio a { color: var(--accent); text-decoration: none; }
     .hero-bio a:hover { text-decoration: underline; }
@@ -95,20 +106,68 @@
     .headshot-placeholder { font-family: var(--mono); font-size: 10px; color: var(--muted); text-align: center; line-height: 1.7; padding: 16px; }
     .headshot-frame img { width: 100%; height: 100%; object-fit: cover; }
 
+    /* ── STATUS BADGE ── */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 5px 13px; background: rgba(90,122,92,.1);
+      border: 1px solid rgba(90,122,92,.28); border-radius: 999px;
+      font-family: var(--mono); font-size: 10.5px;
+      color: var(--accent); letter-spacing: .04em;
+      margin-bottom: 18px; cursor: default; width: fit-content;
+    }
+    .status-dot {
+      width: 6px; height: 6px; background: var(--accent);
+      border-radius: 50%; flex-shrink: 0;
+      animation: pulse-dot 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+
+    /* ── SECTION HEADERS ── */
     .sec-head { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
     .sec-head h2 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); white-space: nowrap; }
     .sec-line { flex: 1; height: 1px; background: var(--border); }
     .sec-more { font-size: 13px; color: var(--accent) !important; white-space: nowrap; }
     section { margin-bottom: 64px; }
 
-    .projects-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; }
-    .proj-card { display: block; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px 16px; text-decoration: none; color: var(--text); transition: border-color .2s, transform .22s, box-shadow .22s; }
-    .proj-card:hover { border-color: rgba(78,201,176,.45); transform: translateY(-3px); box-shadow: 0 14px 36px rgba(0,0,0,.45), 0 0 0 1px rgba(78,201,176,.08); }
-    .proj-stats { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--muted); margin-bottom: 16px; }
-    .proj-icon { width: 46px; height: 46px; border-radius: 11px; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; }
-    .proj-name { font-size: 13px; font-weight: 600; text-align: center; margin-bottom: 7px; }
-    .proj-desc { font-size: 11.5px; color: var(--muted); line-height: 1.5; text-align: center; }
+    /* ── TIMELINE ── */
+    .timeline { display: flex; flex-direction: column; }
+    .tl-item {
+      padding: 20px 0 20px 28px; border-left: 1px solid var(--border); position: relative;
+    }
+    .tl-item::before {
+      content: ''; position: absolute; left: -4px; top: 27px;
+      width: 7px; height: 7px; background: var(--accent); border-radius: 50%;
+      box-shadow: 0 0 0 3px rgba(90,122,92,.15);
+    }
+    .tl-item:last-child { padding-bottom: 4px; }
+    .tl-meta { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; flex-wrap: wrap; }
+    .tl-role { font-size: 14px; font-weight: 600; color: var(--text); }
+    .tl-date { font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+    .tl-company { font-size: 12.5px; color: var(--accent); margin-bottom: 7px; }
+    .tl-desc { font-size: 13.5px; color: var(--muted); line-height: 1.72; }
 
+    /* ── PROJECT BUBBLES ── */
+    .bubbles-wrap { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+    .proj-bubble {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 10px 20px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 999px; color: var(--text); text-decoration: none; font-size: 13px;
+      transition: transform .2s cubic-bezier(.34,1.56,.64,1), border-color .2s, box-shadow .2s;
+    }
+    .proj-bubble:hover {
+      transform: scale(1.06);
+      border-color: rgba(90,122,92,.55);
+      box-shadow: 0 0 0 1px rgba(90,122,92,.12), 0 8px 24px rgba(0,0,0,.45);
+    }
+    .proj-bubble--lg { padding: 12px 26px; font-size: 14px; font-weight: 500; }
+    .bubble-icon { font-size: 16px; line-height: 1; }
+    .bubble-tag {
+      font-family: var(--mono); font-size: 10px; color: var(--muted);
+      padding: 2px 8px; background: rgba(255,255,255,.04);
+      border-radius: 999px; border: 1px solid var(--border);
+    }
+
+    /* ── BLOG ── */
     .post-list { list-style: none; }
     .post-row { display: flex; align-items: baseline; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
     .post-row:first-child { padding-top: 0; }
@@ -118,38 +177,57 @@
     .post-dots { flex: 1; border-bottom: 1px dotted var(--border); margin-bottom: 3px; min-width: 16px; }
     .post-date { font-family: var(--mono); font-size: 10.5px; color: var(--muted); white-space: nowrap; }
 
+    /* ── STACK ── */
+    .stack-grid { display: flex; flex-direction: column; gap: 20px; }
+    .stack-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 9px; }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 9px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 7px 15px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 999px; color: var(--muted); font-size: 13px;
+      text-decoration: none; transition: color .18s, border-color .18s, background .18s;
+      cursor: default;
+    }
+    a.chip { cursor: pointer; }
+    .chip:hover { color: var(--text); border-color: rgba(90,122,92,.4); background: rgba(90,122,92,.06); }
+
+    /* ── ABOUT ── */
     .about-body p { font-size: 15px; line-height: 1.8; color: var(--muted); margin-bottom: 14px; }
     .about-body p:last-child { margin-bottom: 0; }
     .about-body a { color: var(--accent); text-decoration: none; }
     .about-body a:hover { text-decoration: underline; }
 
-    .chip-row { display: flex; flex-wrap: wrap; gap: 9px; }
-    .chip { display: inline-flex; align-items: center; gap: 7px; padding: 7px 15px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; color: var(--muted); font-size: 13px; text-decoration: none; transition: color .18s, border-color .18s, background .18s; }
-    .chip:hover { color: var(--text); border-color: rgba(78,201,176,.4); background: rgba(78,201,176,.04); }
+    /* ── CONTACT ── */
+    .contact-intro { font-size: 15px; color: var(--muted); margin-bottom: 18px; line-height: 1.6; }
 
+    /* ── FOOTER ── */
     footer { text-align: center; padding: 28px 24px 48px; font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--border); }
     footer a { color: var(--accent); text-decoration: none; }
 
+    /* ── SCROLLBAR ── */
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #444; }
+    ::-webkit-scrollbar-thumb:hover { background: #5a4f44; }
   </style>
 </head>
 <body>
 
+<div id="progress-bar"></div>
+<div id="three-bg"></div>
 <canvas id="scene-canvas"></canvas>
-<button id="skip-btn">skip →</button>
+<button id="skip-btn">skip [esc] →</button>
 
 <!-- ══════════════════════════════════════
      PORTFOLIO
 ══════════════════════════════════════ -->
 <div id="portfolio">
   <nav>
-    <a href="#" class="nav-brand">Edmund</a>
+    <a href="#" class="nav-brand">Edmund Tong</a>
     <ul>
-      <li><a href="#writing">Blog</a></li>
+      <li><a href="#experience">Work</a></li>
       <li><a href="#projects">Projects</a></li>
+      <li><a href="#writing">Blog</a></li>
       <li><a href="#about">About</a></li>
     </ul>
     <div class="nav-icons">
@@ -159,16 +237,18 @@
   </nav>
 
   <main>
+
+    <!-- HERO -->
     <div class="hero reveal-item">
       <div class="hero-left">
+        <div class="status-badge"><span class="status-dot"></span>Open to opportunities</div>
         <p class="hero-hello">Hello,</p>
         <h1 class="hero-name">I'm Edmund.</h1>
         <p class="hero-bio">
-          I'm a software engineer passionate about
-          <a href="#">web infrastructure</a> and developer experience.
-          I like building things close to the metal — compilers, bundlers,
-          runtimes — and thinking hard about performance, correctness,
-          and the developer tools that emerge from that work.
+          Computer Engineering Major passionate about
+          <a href="#">systems software</a> and developer experience.
+          I build things close to the metal — compilers, runtimes, bundlers —
+          and care deeply about the invisible scaffolding that makes teams move faster.
         </p>
       </div>
       <div class="headshot-frame">
@@ -176,43 +256,85 @@
       </div>
     </div>
 
+    <!-- EXPERIENCE -->
+    <section id="experience" class="reveal-item">
+      <div class="sec-head">
+        <h2>Experience</h2>
+        <div class="sec-line"></div>
+      </div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-meta">
+            <span class="tl-role">Senior Software Engineer</span>
+            <span class="tl-date">2023 — Present</span>
+          </div>
+          <div class="tl-company">Company · Full-time</div>
+          <div class="tl-desc">Led development of a high-throughput build pipeline reducing CI times by 60%. Designed a plugin architecture adopted across 12 internal teams.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-meta">
+            <span class="tl-role">Software Engineer</span>
+            <span class="tl-date">2021 — 2023</span>
+          </div>
+          <div class="tl-company">Startup · Full-time</div>
+          <div class="tl-desc">Built and shipped a React component library used across all products. Maintained a Node.js API serving 2M+ requests/day.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-meta">
+            <span class="tl-role">Software Engineer Intern</span>
+            <span class="tl-date">Summer 2020</span>
+          </div>
+          <div class="tl-company">Tech Co. · Internship</div>
+          <div class="tl-desc">Contributed to an open-source TypeScript bundler, improving tree-shaking accuracy and reducing output bundle sizes by an average of 18%.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
     <section id="projects" class="reveal-item">
       <div class="sec-head">
-        <h2>Featured Projects</h2>
+        <h2>Projects</h2>
         <div class="sec-line"></div>
         <a href="#" class="sec-more">see all →</a>
       </div>
-      <div class="projects-row">
-        <a href="#" class="proj-card">
-          <div class="proj-stats"><span>↓ 48K/mo</span><span>★ 912</span></div>
-          <div class="proj-icon" style="background:linear-gradient(135deg,#112219,#1b3a2a)">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ec9b0" stroke-width="2" stroke-linecap="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-          </div>
-          <div class="proj-name">DevKit CLI</div>
-          <div class="proj-desc">Zero-config TypeScript toolchain for modern Node.js projects</div>
+      <div class="bubbles-wrap">
+        <a class="proj-bubble proj-bubble--lg" href="#">
+          <span class="bubble-icon">⌨</span>
+          <span>DevKit CLI</span>
+          <span class="bubble-tag">TypeScript</span>
         </a>
-        <a href="#" class="proj-card" style="background:linear-gradient(160deg,#171720,#1a1528)">
-          <div class="proj-stats"><span>↓ 11K/mo</span><span>★ 378</span></div>
-          <div class="proj-icon" style="background:linear-gradient(135deg,#1d1026,#271335)">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff6b9d" stroke-width="2" stroke-linecap="round"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>
-          </div>
-          <div class="proj-name">Meshflow</div>
-          <div class="proj-desc">Graph-based reactive state management for React &amp; Solid</div>
+        <a class="proj-bubble proj-bubble--lg" href="#">
+          <span class="bubble-icon">◈</span>
+          <span>Meshflow</span>
+          <span class="bubble-tag">React</span>
         </a>
-        <a href="#" class="proj-card">
-          <div class="proj-stats"><span>↓ 3.8K/mo</span><span>★ 145</span></div>
-          <div class="proj-icon" style="background:linear-gradient(135deg,#0e1c2e,#122033)">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-          </div>
-          <div class="proj-name">Snapschema</div>
-          <div class="proj-desc">Fast TypeScript-first schema validation with zero runtime cost</div>
+        <a class="proj-bubble" href="#">
+          <span class="bubble-icon">⬡</span>
+          <span>Snapschema</span>
+          <span class="bubble-tag">Validation</span>
+        </a>
+        <a class="proj-bubble" href="#">
+          <span class="bubble-icon">✦</span>
+          <span>Patchwork</span>
+          <span class="bubble-tag">CSS-in-JS</span>
+        </a>
+        <a class="proj-bubble" href="#">
+          <span class="bubble-icon">⟁</span>
+          <span>Kestrel</span>
+          <span class="bubble-tag">Go</span>
+        </a>
+        <a class="proj-bubble" href="#">
+          <span class="bubble-icon">▦</span>
+          <span>Logdeck</span>
+          <span class="bubble-tag">Node.js</span>
         </a>
       </div>
     </section>
 
+    <!-- BLOG -->
     <section id="writing" class="reveal-item">
       <div class="sec-head">
-        <h2>Recent Writing</h2>
+        <h2>Writing</h2>
         <div class="sec-line"></div>
         <a href="#" class="sec-more">all posts →</a>
       </div>
@@ -225,17 +347,70 @@
       </ul>
     </section>
 
+    <!-- STACK -->
+    <section id="skills" class="reveal-item">
+      <div class="sec-head">
+        <h2>Stack</h2>
+        <div class="sec-line"></div>
+      </div>
+      <div class="stack-grid">
+        <div>
+          <div class="stack-label">Languages</div>
+          <div class="chip-row">
+            <span class="chip">TypeScript</span>
+            <span class="chip">Rust</span>
+            <span class="chip">Go</span>
+            <span class="chip">Python</span>
+            <span class="chip">C++</span>
+          </div>
+        </div>
+        <div>
+          <div class="stack-label">Frontend</div>
+          <div class="chip-row">
+            <span class="chip">React</span>
+            <span class="chip">Solid.js</span>
+            <span class="chip">Vite</span>
+            <span class="chip">Tailwind CSS</span>
+            <span class="chip">WebGL</span>
+          </div>
+        </div>
+        <div>
+          <div class="stack-label">Backend &amp; Infra</div>
+          <div class="chip-row">
+            <span class="chip">Node.js</span>
+            <span class="chip">Bun</span>
+            <span class="chip">PostgreSQL</span>
+            <span class="chip">Redis</span>
+            <span class="chip">Docker</span>
+            <span class="chip">Cloudflare Workers</span>
+          </div>
+        </div>
+        <div>
+          <div class="stack-label">Tooling</div>
+          <div class="chip-row">
+            <span class="chip">esbuild</span>
+            <span class="chip">Rollup</span>
+            <span class="chip">LLVM</span>
+            <span class="chip">GitHub Actions</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
     <section id="about" class="reveal-item">
       <div class="sec-head"><h2>About</h2><div class="sec-line"></div></div>
       <div class="about-body">
-        <p>I'm a software engineer focused on web infrastructure and developer experience. Most of my work lives in the open-source ecosystem — build systems, schema validators, and state management libraries that developers depend on every day.</p>
+        <p>I'm a Computer Engineering Major focused on web infrastructure and developer experience. Most of my work lives in the open-source ecosystem — build systems, schema validators, and state management libraries that developers depend on every day.</p>
         <p>I believe that great DX compounds quietly: small improvements in tooling create outsized leverage across engineering teams over time. That's the layer I care most about — the invisible scaffolding that makes everything else faster and more reliable.</p>
         <p>Outside of code, I read papers on compilers and distributed systems, tinker with new language runtimes, and chase the best ramen spot in whatever city I'm in.</p>
       </div>
     </section>
 
-    <section id="links" class="reveal-item">
-      <div class="sec-head"><h2>Find Me</h2><div class="sec-line"></div></div>
+    <!-- CONTACT -->
+    <section id="contact" class="reveal-item">
+      <div class="sec-head"><h2>Contact</h2><div class="sec-line"></div></div>
+      <p class="contact-intro">Always open to new conversations — whether it's a project, an opportunity, or just a good idea worth talking through.</p>
       <div class="chip-row">
         <a href="https://github.com/Emmit3" class="chip" target="_blank" rel="noopener">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
@@ -255,46 +430,58 @@
         </a>
       </div>
     </section>
+
   </main>
 
   <footer>
-    Edmund &nbsp;·&nbsp;
+    Edmund Tong &nbsp;·&nbsp;
     <a href="https://github.com/Emmit3/Emmit3.github.io" target="_blank" rel="noopener">Source</a>
-    &nbsp;·&nbsp; 2025
+    &nbsp;·&nbsp; 2026
+    &nbsp;·&nbsp; Photo by <a href="https://unsplash.com/@chrisbrignola" target="_blank" rel="noopener">Chris Brignola</a> / Unsplash
   </footer>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
+// ════════════════════════════════════════════════════════
+//  CINEMATIC BACKGROUND IMAGE
+// ════════════════════════════════════════════════════════
+let bgImage = null;
+(function () {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => { bgImage = img; };
+  img.src = 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=3840&q=85&auto=format&fit=crop';
+})();
+
 // ════════════════════════════════════════════════════════
 //  SETUP
 // ════════════════════════════════════════════════════════
-const cv  = document.getElementById('scene-canvas');
-const ctx = cv.getContext('2d');
+const cv       = document.getElementById('scene-canvas');
+const ctx      = cv.getContext('2d');
 const portfolio = document.getElementById('portfolio');
 const skipBtn   = document.getElementById('skip-btn');
+const threeBg   = document.getElementById('three-bg');
 
 let W, H;
-function resize() {
-  W = cv.width  = window.innerWidth;
-  H = cv.height = window.innerHeight;
-}
+function resize() { W = cv.width = window.innerWidth; H = cv.height = window.innerHeight; }
 resize();
 window.addEventListener('resize', resize);
 
-// Phases: 'robot' → 'spin' → 'black' → 'cloud' → 'reform' → 'done'
-let phase     = 'robot';
-let T         = 0;
-let prevNow   = null;
-let phaseT    = 0;  // time within current phase
+// Phases: 'robot' → (click) → 'spin' → 'black' → 'cloud' → 'reform' → 'done'
+let phase  = 'robot';
+let T      = 0;
+let prevNow = null;
+let phaseT = 0;
 
 // ════════════════════════════════════════════════════════
 //  PRE-GENERATED BACKGROUND ELEMENTS
 // ════════════════════════════════════════════════════════
 const bgDust = Array.from({ length: 90 }, () => ({
   nx: Math.random(), ny: Math.random(),
-  r:  0.4 + Math.random() * 2.2,
-  a:  0.04 + Math.random() * 0.22,
-  f:  0.2  + Math.random() * 0.8,
+  r: 0.4 + Math.random() * 2.2,
+  a: 0.04 + Math.random() * 0.22,
+  f: 0.2 + Math.random() * 0.8,
   ph: Math.random() * Math.PI * 2,
   warm: Math.random() < 0.5
 }));
@@ -302,639 +489,531 @@ const bgDust = Array.from({ length: 90 }, () => ({
 const rainDrops = Array.from({ length: 140 }, () => ({
   nx: Math.random(), ny: Math.random() * 1.2,
   spd: (3.5 + Math.random() * 4) / 700,
-  len: (10  + Math.random() * 18) / 700,
-  sln: (1.5 + Math.random() * 2)  / 700
+  len: (10 + Math.random() * 18) / 700,
+  sln: (1.5 + Math.random() * 2) / 700
 }));
 
 // ════════════════════════════════════════════════════════
 //  CANVAS HELPERS
 // ════════════════════════════════════════════════════════
-function rr(x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.roundRect(x, y, w, h, r);
-}
-
+function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
 function lg(x1, y1, x2, y2, stops) {
   const g = ctx.createLinearGradient(x1, y1, x2, y2);
-  stops.forEach(([t, c]) => g.addColorStop(t, c));
-  return g;
+  stops.forEach(([t, c]) => g.addColorStop(t, c)); return g;
 }
-
 function rg(cx, cy, r0, r1, stops) {
   const g = ctx.createRadialGradient(cx, cy, r0, cx, cy, r1);
-  stops.forEach(([t, c]) => g.addColorStop(t, c));
-  return g;
+  stops.forEach(([t, c]) => g.addColorStop(t, c)); return g;
 }
 
 // ════════════════════════════════════════════════════════
-//  BACKGROUND (Blade Runner atmosphere)
+//  BACKGROUND
 // ════════════════════════════════════════════════════════
 function drawBackground(t) {
-  // Sky
   ctx.fillStyle = '#030308';
   ctx.fillRect(0, 0, W, H);
 
-  // Orange key light (right, elevated)
-  ctx.fillStyle = rg(W * 0.76, H * 0.22, 0, W * 0.58, [
-    [0,   'rgba(255,130,20,0.13)'],
-    [0.5, 'rgba(200,70,10,0.05)'],
-    [1,   'transparent']
-  ]);
-  ctx.fillRect(0, 0, W, H);
+  if (bgImage) {
+    const iA = bgImage.naturalWidth / bgImage.naturalHeight;
+    const sA = W / H;
+    let dx, dy, dw, dh;
+    if (iA > sA) { dh = H; dw = H * iA; dx = (W - dw) / 2; dy = 0; }
+    else          { dw = W; dh = W / iA; dx = 0; dy = (H - dh) / 2; }
+    ctx.save(); ctx.globalAlpha = 0.38;
+    ctx.drawImage(bgImage, dx, dy, dw, dh);
+    ctx.restore();
+    ctx.fillStyle = 'rgba(3,3,8,0.44)';
+    ctx.fillRect(0, 0, W, H);
+  }
 
-  // Secondary warm glow (mid-right)
-  ctx.fillStyle = rg(W * 0.65, H * 0.55, 0, W * 0.40, [
-    [0,   'rgba(255,80,10,0.08)'],
-    [1,   'transparent']
-  ]);
-  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = rg(W*.76, H*.22, 0, W*.58, [[0,'rgba(255,130,20,0.13)'],[0.5,'rgba(200,70,10,0.05)'],[1,'transparent']]);
+  ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = rg(W*.65, H*.55, 0, W*.40, [[0,'rgba(255,80,10,0.08)'],[1,'transparent']]);
+  ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = rg(0, H*.38, 0, W*.38, [[0,'rgba(0,210,220,0.07)'],[1,'transparent']]);
+  ctx.fillRect(0,0,W,H);
 
-  // Cool teal rim light (left)
-  ctx.fillStyle = rg(0, H * 0.38, 0, W * 0.38, [
-    [0,   'rgba(0,210,220,0.07)'],
-    [1,   'transparent']
-  ]);
-  ctx.fillRect(0, 0, W, H);
-
-  // Distant haze band
   const fogY = H * 0.52;
-  const fog = ctx.createLinearGradient(0, fogY - 50, 0, fogY + 90);
-  fog.addColorStop(0,   'transparent');
-  fog.addColorStop(0.45,'rgba(15,8,28,0.28)');
-  fog.addColorStop(1,   'transparent');
-  ctx.fillStyle = fog;
-  ctx.fillRect(0, fogY - 50, W, 140);
+  const fog = ctx.createLinearGradient(0, fogY-50, 0, fogY+90);
+  fog.addColorStop(0,'transparent'); fog.addColorStop(0.45,'rgba(15,8,28,0.28)'); fog.addColorStop(1,'transparent');
+  ctx.fillStyle = fog; ctx.fillRect(0, fogY-50, W, 140);
 
-  // Floating bokeh / dust
   for (const p of bgDust) {
     ctx.globalAlpha = p.a * (0.35 + 0.65 * Math.sin(t * p.f + p.ph));
-    ctx.fillStyle   = p.warm ? '#ff9944' : '#44aacc';
-    ctx.shadowColor = p.warm ? '#ff6600' : '#00aacc';
-    ctx.shadowBlur  = 6;
+    ctx.fillStyle = p.warm ? '#ff9944' : '#44aacc';
+    ctx.shadowColor = p.warm ? '#ff6600' : '#00aacc'; ctx.shadowBlur = 6;
     ctx.beginPath();
-    ctx.arc(
-      p.nx * W + Math.sin(t * 0.25 + p.ph) * 5,
-      p.ny * H + Math.cos(t * 0.20 + p.ph) * 4,
-      p.r, 0, Math.PI * 2
-    );
+    ctx.arc(p.nx*W + Math.sin(t*.25+p.ph)*5, p.ny*H + Math.cos(t*.20+p.ph)*4, p.r, 0, Math.PI*2);
     ctx.fill();
   }
-  ctx.globalAlpha = 1;
-  ctx.shadowBlur  = 0;
+  ctx.globalAlpha = 1; ctx.shadowBlur = 0;
 
-  // ── FLOOR ──
   const floorY = H * 0.73;
-
-  ctx.fillStyle = lg(0, floorY, 0, H, [
-    [0,   '#0d0a18'],
-    [0.4, '#080612'],
-    [1,   '#030208']
-  ]);
+  ctx.fillStyle = lg(0, floorY, 0, H, [[0,'#0d0a18'],[0.4,'#080612'],[1,'#030208']]);
   ctx.fillRect(0, floorY, W, H - floorY);
 
-  // Floor grid (perspective, orange tint)
+  // Perspective floor grid
   const vpX = W * 0.52;
-  ctx.save();
-  ctx.globalAlpha = 0.10;
-  ctx.strokeStyle = '#ff8822';
-  ctx.lineWidth   = 0.6;
-  for (let i = -16; i <= 16; i++) {
-    ctx.beginPath();
-    ctx.moveTo(vpX, floorY);
-    ctx.lineTo(vpX + i * 95, H + 10);
-    ctx.stroke();
+  const spread = W * 0.90;
+  const nLines = 22;
+  ctx.save(); ctx.globalAlpha = 0.10; ctx.strokeStyle = '#ff8822'; ctx.lineWidth = 0.6;
+  for (let i = -nLines; i <= nLines; i++) {
+    const bx = vpX + (i / nLines) * spread;
+    ctx.beginPath(); ctx.moveTo(vpX, floorY); ctx.lineTo(bx, H+10); ctx.stroke();
   }
-  for (let row = 1; row <= 9; row++) {
-    const f  = row / 9;
+  for (let row = 1; row <= 10; row++) {
+    const f = row / 10;
     const fy = floorY + (H - floorY) * (f * f);
-    const hw = 45 + f * 640;
-    ctx.beginPath();
-    ctx.moveTo(vpX - hw, fy);
-    ctx.lineTo(vpX + hw, fy);
-    ctx.stroke();
+    const t2 = (fy - floorY) / (H + 10 - floorY);
+    const hw = spread * t2;
+    ctx.beginPath(); ctx.moveTo(vpX-hw, fy); ctx.lineTo(vpX+hw, fy); ctx.stroke();
   }
   ctx.restore();
 
-  // Floor glow under robot
-  ctx.fillStyle = rg(W * 0.52, floorY + 8, 0, W * 0.30, [
-    [0,   'rgba(255,130,0,0.18)'],
-    [0.6, 'rgba(255,80,0,0.04)'],
-    [1,   'transparent']
-  ]);
-  ctx.fillRect(0, floorY, W, H - floorY);
+  ctx.fillStyle = rg(W*.52, floorY+8, 0, W*.30, [[0,'rgba(255,130,0,0.18)'],[0.6,'rgba(255,80,0,0.04)'],[1,'transparent']]);
+  ctx.fillRect(0, floorY, W, H-floorY);
 
-  // Rain
-  ctx.save();
-  ctx.globalAlpha = 0.065;
-  ctx.strokeStyle = '#aac8ff';
-  ctx.lineWidth   = 0.55;
+  ctx.save(); ctx.globalAlpha = 0.065; ctx.strokeStyle = '#aac8ff'; ctx.lineWidth = 0.55;
   for (const r of rainDrops) {
-    r.ny += r.spd;
-    if (r.ny > 1.08) r.ny = -0.06;
-    const rx = r.nx * W, ry = r.ny * H;
-    ctx.beginPath();
-    ctx.moveTo(rx, ry);
-    ctx.lineTo(rx - r.sln * W * 2, ry + r.len * H * 2);
-    ctx.stroke();
+    r.ny += r.spd; if (r.ny > 1.08) r.ny = -0.06;
+    const rx = r.nx*W, ry = r.ny*H;
+    ctx.beginPath(); ctx.moveTo(rx,ry); ctx.lineTo(rx - r.sln*W*2, ry + r.len*H*2); ctx.stroke();
   }
   ctx.restore();
 }
 
 // ════════════════════════════════════════════════════════
-//  ROBOT (Blade Runner 2049 style — round dome + orange visor)
+//  ROBOT
 // ════════════════════════════════════════════════════════
 function drawRobot(t) {
   const floorY = H * 0.73;
-  const S  = H / 860;          // scale factor
-  const bx = W * 0.52;         // robot base-x (feet)
-  const by = floorY;           // feet at floor
+  const S  = H / 860;
+  const bx = W * 0.52;
+  const by = floorY;
 
-  const breathe  = Math.sin(t * 0.88)  * 1.9 * S;
-  const visorP   = 0.68 + 0.32 * Math.sin(t * 2.4);   // visor pulse
-  const chestP   = 0.50 + 0.50 * Math.sin(t * 1.75);  // chest pulse
+  const breathe = Math.sin(t * 0.88) * 1.9 * S;
+  const visorP  = 0.68 + 0.32 * Math.sin(t * 2.4);
+  const chestP  = 0.50 + 0.50 * Math.sin(t * 1.75);
 
-  // ── Floor shadow ──
-  ctx.save();
-  ctx.globalAlpha = 0.48;
-  ctx.fillStyle = rg(bx, by, 4, 95 * S, [
-    [0,   'rgba(0,0,0,0.75)'],
-    [1,   'transparent']
-  ]);
-  ctx.beginPath();
-  ctx.ellipse(bx, by, 92 * S, 20 * S, 0, 0, Math.PI * 2);
-  ctx.fill();
+  // Floor shadow
+  ctx.save(); ctx.globalAlpha = 0.48;
+  ctx.fillStyle = rg(bx, by, 4, 95*S, [[0,'rgba(0,0,0,0.75)'],[1,'transparent']]);
+  ctx.beginPath(); ctx.ellipse(bx, by, 92*S, 20*S, 0, 0, Math.PI*2); ctx.fill();
   ctx.restore();
 
-  // ── RIGHT LEG (farther — drawn behind left) ──
-  const rLx   = bx + 28 * S;
-  const legTY = by - 158 * S;
-
-  ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.85)';
-  ctx.shadowBlur  = 10;
-
-  // Right upper leg
-  ctx.fillStyle = lg(rLx - 14*S, 0, rLx + 14*S, 0, [
-    [0, '#707078'], [0.5, '#aaaaB2'], [1, '#505058']
-  ]);
-  rr(rLx - 14*S, legTY + 4*S, 28*S, 62*S, 7*S);
-  ctx.fill();
-
-  // Knee joint
-  ctx.fillStyle = '#1c1c24';
-  ctx.beginPath();
-  ctx.arc(rLx, legTY + 68*S, 9*S, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Right lower leg
-  ctx.fillStyle = lg(rLx - 12*S, 0, rLx + 12*S, 0, [
-    [0, '#191920'], [0.5, '#2a2a34'], [1, '#101018']
-  ]);
-  rr(rLx - 12*S, legTY + 74*S, 24*S, 46*S, 6*S);
-  ctx.fill();
-
-  // Right boot
-  ctx.fillStyle = lg(rLx - 17*S, 0, rLx + 24*S, 0, [
-    [0, '#18181e'], [0.5, '#2e2e3a'], [1, '#101018']
-  ]);
-  rr(rLx - 18*S, legTY + 118*S, 42*S, 46*S, 9*S);
-  ctx.fill();
-
-  // Right boot orange strip
-  ctx.globalAlpha = 0.68;
-  ctx.fillStyle   = '#ff8800';
-  ctx.shadowColor = '#ff8800';
-  ctx.shadowBlur  = 8;
-  ctx.fillRect(rLx - 16*S, legTY + 156*S, 38*S, 3.5*S);
+  // Right leg
+  const rLx = bx + 28*S;
+  const legTY = by - 158*S;
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.85)'; ctx.shadowBlur = 10;
+  ctx.fillStyle = lg(rLx-14*S,0,rLx+14*S,0,[[0,'#707078'],[0.5,'#aaaab2'],[1,'#505058']]);
+  rr(rLx-14*S, legTY+4*S, 28*S, 62*S, 7*S); ctx.fill();
+  ctx.fillStyle = '#1c1c24'; ctx.beginPath(); ctx.arc(rLx, legTY+68*S, 9*S, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = lg(rLx-12*S,0,rLx+12*S,0,[[0,'#191920'],[0.5,'#2a2a34'],[1,'#101018']]);
+  rr(rLx-12*S, legTY+74*S, 24*S, 46*S, 6*S); ctx.fill();
+  ctx.fillStyle = lg(rLx-17*S,0,rLx+24*S,0,[[0,'#18181e'],[0.5,'#2e2e3a'],[1,'#101018']]);
+  rr(rLx-18*S, legTY+118*S, 42*S, 46*S, 9*S); ctx.fill();
+  ctx.globalAlpha = 0.68; ctx.fillStyle = '#ff8800'; ctx.shadowColor = '#ff8800'; ctx.shadowBlur = 8;
+  ctx.fillRect(rLx-16*S, legTY+156*S, 38*S, 3.5*S);
   ctx.restore();
 
-  // ── LEFT LEG (closer) ──
-  const lLx = bx - 30 * S;
-
-  ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.8)';
-  ctx.shadowBlur  = 14;
-
-  // Left upper leg
-  ctx.fillStyle = lg(lLx - 17*S, 0, lLx + 19*S, 0, [
-    [0, '#b0b0b8'], [0.45, '#d8d8e2'], [1, '#888890']
-  ]);
-  rr(lLx - 17*S, legTY, 36*S, 66*S, 9*S);
-  ctx.fill();
-
-  // Knee joint
-  ctx.fillStyle = '#24242c';
-  ctx.beginPath();
-  ctx.arc(lLx, legTY + 68*S, 10*S, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Left lower leg
-  ctx.fillStyle = lg(lLx - 14*S, 0, lLx + 14*S, 0, [
-    [0, '#1e1e28'], [0.5, '#363644'], [1, '#141420']
-  ]);
-  rr(lLx - 14*S, legTY + 74*S, 28*S, 48*S, 7*S);
-  ctx.fill();
-
-  // Left boot
-  ctx.fillStyle = lg(lLx - 22*S, 0, lLx + 28*S, 0, [
-    [0, '#20202c'], [0.4, '#38384a'], [1, '#16161e']
-  ]);
-  rr(lLx - 23*S, legTY + 120*S, 50*S, 48*S, 11*S);
-  ctx.fill();
-
-  // Left boot orange strip
-  ctx.fillStyle   = '#ff8800';
-  ctx.shadowColor = '#ff9900';
-  ctx.shadowBlur  = 14;
-  ctx.fillRect(lLx - 21*S, legTY + 160*S, 46*S, 4.5*S);
+  // Left leg
+  const lLx = bx - 30*S;
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 14;
+  ctx.fillStyle = lg(lLx-17*S,0,lLx+19*S,0,[[0,'#b0b0b8'],[0.45,'#d8d8e2'],[1,'#888890']]);
+  rr(lLx-17*S, legTY, 36*S, 66*S, 9*S); ctx.fill();
+  ctx.fillStyle = '#24242c'; ctx.beginPath(); ctx.arc(lLx, legTY+68*S, 10*S, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = lg(lLx-14*S,0,lLx+14*S,0,[[0,'#1e1e28'],[0.5,'#363644'],[1,'#141420']]);
+  rr(lLx-14*S, legTY+74*S, 28*S, 48*S, 7*S); ctx.fill();
+  ctx.fillStyle = lg(lLx-22*S,0,lLx+28*S,0,[[0,'#20202c'],[0.4,'#38384a'],[1,'#16161e']]);
+  rr(lLx-23*S, legTY+120*S, 50*S, 48*S, 11*S); ctx.fill();
+  ctx.fillStyle = '#ff8800'; ctx.shadowColor = '#ff9900'; ctx.shadowBlur = 14;
+  ctx.fillRect(lLx-21*S, legTY+160*S, 46*S, 4.5*S);
   ctx.restore();
 
-  // ── TORSO ──
-  const torsoX = bx + 2 * S;
-  const torsoY = by - 330 * S + breathe;
-  const TW     = 118 * S;
-  const TH     = 168 * S;
-
-  ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.85)';
-  ctx.shadowBlur  = 22;
-
-  // Main torso
-  ctx.fillStyle = lg(torsoX - TW/2, 0, torsoX + TW/2, 0, [
-    [0,    '#a8a8b0'],
-    [0.3,  '#d5d5de'],
-    [0.55, '#e2e2ea'],
-    [0.8,  '#c8c8d0'],
-    [1,    '#787880']
-  ]);
-  rr(torsoX - TW/2, torsoY, TW, TH, 14*S);
-  ctx.fill();
-
-  // Chest panel inset
-  ctx.globalAlpha = 0.22;
-  ctx.strokeStyle = '#909098';
-  ctx.lineWidth   = 1.5 * S;
-  rr(torsoX - 36*S, torsoY + 12*S, 72*S, 62*S, 6*S);
-  ctx.stroke();
-
-  // Horizontal torso seam
+  // Torso
+  const torsoX = bx + 2*S;
+  const torsoY = by - 330*S + breathe;
+  const TW = 118*S, TH = 168*S;
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.85)'; ctx.shadowBlur = 22;
+  ctx.fillStyle = lg(torsoX-TW/2,0,torsoX+TW/2,0,[[0,'#a8a8b0'],[0.3,'#d5d5de'],[0.55,'#e2e2ea'],[0.8,'#c8c8d0'],[1,'#787880']]);
+  rr(torsoX-TW/2, torsoY, TW, TH, 14*S); ctx.fill();
+  ctx.globalAlpha = 0.22; ctx.strokeStyle = '#909098'; ctx.lineWidth = 1.5*S;
+  rr(torsoX-36*S, torsoY+12*S, 72*S, 62*S, 6*S); ctx.stroke();
   ctx.globalAlpha = 0.18;
-  ctx.beginPath();
-  ctx.moveTo(torsoX - TW/2 + 12*S, torsoY + 82*S);
-  ctx.lineTo(torsoX + TW/2 - 12*S, torsoY + 82*S);
-  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(torsoX-TW/2+12*S, torsoY+82*S); ctx.lineTo(torsoX+TW/2-12*S, torsoY+82*S); ctx.stroke();
   ctx.restore();
 
-  // Chest center orb
   ctx.save();
-  ctx.fillStyle   = rg(torsoX, torsoY + 34*S, 0, 20*S, [
-    [0,   `rgba(255,170,30,${0.85 + chestP * 0.15})`],
-    [0.4, `rgba(255,100,10,${0.35 + chestP * 0.25})`],
-    [1,   'transparent']
-  ]);
-  ctx.shadowColor = '#ff9900';
-  ctx.shadowBlur  = 28 + chestP * 22;
-  ctx.beginPath();
-  ctx.arc(torsoX, torsoY + 34*S, 10*S, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.fillStyle = rg(torsoX, torsoY+34*S, 0, 20*S, [[0,`rgba(255,170,30,${0.85+chestP*.15})`],[0.4,`rgba(255,100,10,${0.35+chestP*.25})`],[1,'transparent']]);
+  ctx.shadowColor = '#ff9900'; ctx.shadowBlur = 28 + chestP*22;
+  ctx.beginPath(); ctx.arc(torsoX, torsoY+34*S, 10*S, 0, Math.PI*2); ctx.fill();
   ctx.restore();
 
-  // Torso bottom orange accent strip
-  ctx.save();
-  ctx.fillStyle   = '#ff8800';
-  ctx.shadowColor = '#ff9900';
-  ctx.shadowBlur  = 16 + visorP * 12;
-  ctx.fillRect(torsoX - 46*S, torsoY + TH - 8*S, 92*S, 5*S);
+  ctx.save(); ctx.fillStyle = '#ff8800'; ctx.shadowColor = '#ff9900'; ctx.shadowBlur = 16 + visorP*12;
+  ctx.fillRect(torsoX-46*S, torsoY+TH-8*S, 92*S, 5*S);
   ctx.restore();
 
-  // ── LEFT SHOULDER PAD (closer) ──
-  ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.7)';
-  ctx.shadowBlur  = 12;
-  ctx.fillStyle = lg(torsoX - TW/2 - 14*S, 0, torsoX - TW/2 + 28*S, 0, [
-    [0, '#c8c8d0'], [0.5, '#e6e6ee'], [1, '#b0b0b8']
-  ]);
-  rr(torsoX - TW/2 - 14*S, torsoY - 5*S, 40*S, 27*S, 11*S);
-  ctx.fill();
+  // Shoulders
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.7)'; ctx.shadowBlur = 12;
+  ctx.fillStyle = lg(torsoX-TW/2-14*S,0,torsoX-TW/2+28*S,0,[[0,'#c8c8d0'],[0.5,'#e6e6ee'],[1,'#b0b0b8']]);
+  rr(torsoX-TW/2-14*S, torsoY-5*S, 40*S, 27*S, 11*S); ctx.fill(); ctx.restore();
+  ctx.save(); ctx.globalAlpha = 0.80; ctx.shadowBlur = 7;
+  ctx.fillStyle = lg(torsoX+TW/2-18*S,0,torsoX+TW/2+18*S,0,[[0,'#888890'],[0.5,'#b0b0b8'],[1,'#686870']]);
+  rr(torsoX+TW/2-18*S, torsoY-3*S, 35*S, 24*S, 10*S); ctx.fill(); ctx.restore();
+
+  // Arms
+  const rAx = torsoX + 67*S, armTY = torsoY + 14*S;
+  ctx.save(); ctx.globalAlpha = 0.76; ctx.shadowBlur = 7;
+  ctx.fillStyle = lg(rAx-12*S,0,rAx+12*S,0,[[0,'#6e6e76'],[0.5,'#9e9ea6'],[1,'#525258']]);
+  rr(rAx-12*S, armTY, 24*S, 72*S, 10*S); ctx.fill();
+  ctx.fillStyle = lg(rAx-11*S,0,rAx+11*S,0,[[0,'#141420'],[0.5,'#222230'],[1,'#0e0e1a']]);
+  rr(rAx-11*S, armTY+74*S, 22*S, 54*S, 7*S); ctx.fill();
+  ctx.fillStyle = '#1a1a26'; ctx.beginPath(); ctx.arc(rAx, armTY+138*S, 13*S, 0, Math.PI*2); ctx.fill();
   ctx.restore();
 
-  // ── RIGHT SHOULDER PAD (farther) ──
-  ctx.save();
-  ctx.globalAlpha = 0.80;
-  ctx.shadowBlur  = 7;
-  ctx.fillStyle = lg(torsoX + TW/2 - 18*S, 0, torsoX + TW/2 + 18*S, 0, [
-    [0, '#888890'], [0.5, '#b0b0b8'], [1, '#686870']
-  ]);
-  rr(torsoX + TW/2 - 18*S, torsoY - 3*S, 35*S, 24*S, 10*S);
-  ctx.fill();
+  const lAx = torsoX - 68*S;
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.75)'; ctx.shadowBlur = 12;
+  ctx.fillStyle = lg(lAx-16*S,0,lAx+16*S,0,[[0,'#adadb5'],[0.45,'#d5d5de'],[1,'#7c7c84']]);
+  rr(lAx-15*S, armTY, 30*S, 75*S, 10*S); ctx.fill();
+  ctx.fillStyle = lg(lAx-13*S,0,lAx+13*S,0,[[0,'#1c1c28'],[0.5,'#303042'],[1,'#121220']]);
+  rr(lAx-13*S, armTY+77*S, 26*S, 57*S, 8*S); ctx.fill();
+  ctx.fillStyle = '#222232'; ctx.beginPath(); ctx.arc(lAx, armTY+145*S, 15*S, 0, Math.PI*2); ctx.fill();
   ctx.restore();
 
-  // ── RIGHT ARM (farther — drawn first) ──
-  const rAx   = torsoX + 67 * S;
-  const armTY = torsoY + 14 * S;
+  // Head
+  const hcx = bx + 6*S, hcy = by - 490*S + breathe, HR = 82*S;
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 8;
+  ctx.fillStyle = lg(hcx-13*S,0,hcx+13*S,0,[[0,'#18181e'],[0.5,'#2c2c36'],[1,'#10101a']]);
+  rr(hcx-12*S, hcy+HR-4*S, 24*S, 34*S, 5*S); ctx.fill(); ctx.restore();
 
-  ctx.save();
-  ctx.globalAlpha = 0.76;
-  ctx.shadowBlur  = 7;
-
-  ctx.fillStyle = lg(rAx - 12*S, 0, rAx + 12*S, 0, [
-    [0, '#6e6e76'], [0.5, '#9e9ea6'], [1, '#525258']
-  ]);
-  rr(rAx - 12*S, armTY, 24*S, 72*S, 10*S);
-  ctx.fill();
-
-  ctx.fillStyle = lg(rAx - 11*S, 0, rAx + 11*S, 0, [
-    [0, '#141420'], [0.5, '#222230'], [1, '#0e0e1a']
-  ]);
-  rr(rAx - 11*S, armTY + 74*S, 22*S, 54*S, 7*S);
-  ctx.fill();
-
-  ctx.fillStyle = '#1a1a26';
-  ctx.beginPath();
-  ctx.arc(rAx, armTY + 138*S, 13*S, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 30;
+  ctx.fillStyle = rg(hcx-HR*.38, hcy-HR*.32, HR*.04, HR*1.12, [[0,'#ebebf3'],[0.35,'#d2d2da'],[0.70,'#a8a8b0'],[1,'#6a6a72']]);
+  ctx.beginPath(); ctx.arc(hcx, hcy, HR, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 0.12; ctx.strokeStyle = '#5a5a64'; ctx.lineWidth = 1.5*S;
+  ctx.beginPath(); ctx.arc(hcx+4*S, hcy, HR*.82, Math.PI*.05, Math.PI*.95); ctx.stroke();
   ctx.restore();
 
-  // ── LEFT ARM (closer) ──
-  const lAx = torsoX - 68 * S;
+  // Visor
+  const visorY = hcy + 4*S, visorRx = HR*.90, visorRy = HR*.24;
+  ctx.save(); ctx.fillStyle = '#040206'; ctx.shadowBlur = 0;
+  ctx.beginPath(); ctx.ellipse(hcx, visorY, visorRx+1*S, visorRy+1*S, 0, 0, Math.PI*2); ctx.fill(); ctx.restore();
 
   ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.75)';
-  ctx.shadowBlur  = 12;
-
-  ctx.fillStyle = lg(lAx - 16*S, 0, lAx + 16*S, 0, [
-    [0, '#adadb5'], [0.45, '#d5d5de'], [1, '#7c7c84']
-  ]);
-  rr(lAx - 15*S, armTY, 30*S, 75*S, 10*S);
-  ctx.fill();
-
-  ctx.fillStyle = lg(lAx - 13*S, 0, lAx + 13*S, 0, [
-    [0, '#1c1c28'], [0.5, '#303042'], [1, '#121220']
-  ]);
-  rr(lAx - 13*S, armTY + 77*S, 26*S, 57*S, 8*S);
-  ctx.fill();
-
-  ctx.fillStyle = '#222232';
-  ctx.beginPath();
-  ctx.arc(lAx, armTY + 145*S, 15*S, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-
-  // ── HEAD ──
-  const hcx = bx + 6 * S;
-  const hcy = by - 490 * S + breathe;
-  const HR  = 82 * S;  // head sphere radius
-
-  // Neck
-  ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.9)';
-  ctx.shadowBlur  = 8;
-  ctx.fillStyle = lg(hcx - 13*S, 0, hcx + 13*S, 0, [
-    [0, '#18181e'], [0.5, '#2c2c36'], [1, '#10101a']
-  ]);
-  rr(hcx - 12*S, hcy + HR - 4*S, 24*S, 34*S, 5*S);
-  ctx.fill();
-  ctx.restore();
-
-  // Main dome — spherical gradient for 3D feel
-  ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.9)';
-  ctx.shadowBlur  = 30;
-  ctx.fillStyle = rg(
-    hcx - HR * 0.38, hcy - HR * 0.32, HR * 0.04, HR * 1.12, [
-    [0,    '#ebebf3'],
-    [0.35, '#d2d2da'],
-    [0.70, '#a8a8b0'],
-    [1,    '#6a6a72']
-  ]);
-  ctx.beginPath();
-  ctx.arc(hcx, hcy, HR, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Dome panel seam (subtle arc)
-  ctx.globalAlpha = 0.12;
-  ctx.strokeStyle = '#5a5a64';
-  ctx.lineWidth   = 1.5 * S;
-  ctx.beginPath();
-  ctx.arc(hcx + 4*S, hcy, HR * 0.82, Math.PI * 0.05, Math.PI * 0.95);
-  ctx.stroke();
-  ctx.restore();
-
-  // ── VISOR — the signature orange glowing band ──
-  const visorY  = hcy + 4 * S;
-  const visorRx = HR * 0.90;
-  const visorRy = HR * 0.24;
-
-  // Visor socket (deep dark recess)
-  ctx.save();
-  ctx.fillStyle   = '#040206';
-  ctx.shadowBlur  = 0;
-  ctx.beginPath();
-  ctx.ellipse(hcx, visorY, visorRx + 1*S, visorRy + 1*S, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-
-  // Visor inner glow gradient
-  ctx.save();
-  const vg = ctx.createLinearGradient(hcx - visorRx, visorY, hcx + visorRx, visorY);
-  vg.addColorStop(0,    `rgba(180,60,0,${0.22 * visorP})`);
-  vg.addColorStop(0.15, `rgba(255,130,15,${0.82 * visorP})`);
+  const vg = ctx.createLinearGradient(hcx-visorRx, visorY, hcx+visorRx, visorY);
+  vg.addColorStop(0,    `rgba(180,60,0,${0.22*visorP})`);
+  vg.addColorStop(0.15, `rgba(255,130,15,${0.82*visorP})`);
   vg.addColorStop(0.32, `rgba(255,195,50,${visorP})`);
   vg.addColorStop(0.50, `rgba(255,215,70,${visorP})`);
   vg.addColorStop(0.68, `rgba(255,195,50,${visorP})`);
-  vg.addColorStop(0.85, `rgba(255,130,15,${0.82 * visorP})`);
-  vg.addColorStop(1,    `rgba(180,60,0,${0.22 * visorP})`);
-  ctx.fillStyle   = vg;
-  ctx.shadowColor = '#ff9900';
-  ctx.shadowBlur  = 36 + visorP * 28;
-  ctx.beginPath();
-  ctx.ellipse(hcx, visorY, visorRx * 0.92, visorRy * 0.85, 0, 0, Math.PI * 2);
-  ctx.fill();
+  vg.addColorStop(0.85, `rgba(255,130,15,${0.82*visorP})`);
+  vg.addColorStop(1,    `rgba(180,60,0,${0.22*visorP})`);
+  ctx.fillStyle = vg; ctx.shadowColor = '#ff9900'; ctx.shadowBlur = 36 + visorP*28;
+  ctx.beginPath(); ctx.ellipse(hcx, visorY, visorRx*.92, visorRy*.85, 0, 0, Math.PI*2); ctx.fill();
   ctx.restore();
 
-  // Visor outer rim
   ctx.save();
-  ctx.strokeStyle = `rgba(255,165,45,${0.5 + visorP * 0.5})`;
-  ctx.lineWidth   = 2.5 * S;
-  ctx.shadowColor = '#ff9900';
-  ctx.shadowBlur  = 20;
-  ctx.beginPath();
-  ctx.ellipse(hcx, visorY, visorRx, visorRy, 0, 0, Math.PI * 2);
-  ctx.stroke();
+  ctx.strokeStyle = `rgba(255,165,45,${0.5+visorP*.5})`; ctx.lineWidth = 2.5*S;
+  ctx.shadowColor = '#ff9900'; ctx.shadowBlur = 20;
+  ctx.beginPath(); ctx.ellipse(hcx, visorY, visorRx, visorRy, 0, 0, Math.PI*2); ctx.stroke();
   ctx.restore();
 
-  // Visor specular highlight
-  ctx.save();
-  ctx.globalAlpha = 0.22;
-  ctx.fillStyle   = 'rgba(255,250,220,0.7)';
-  ctx.beginPath();
-  ctx.ellipse(hcx - visorRx * 0.22, visorY - visorRy * 0.42,
-    visorRx * 0.28, visorRy * 0.22, -0.18, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.save(); ctx.globalAlpha = 0.22; ctx.fillStyle = 'rgba(255,250,220,0.7)';
+  ctx.beginPath(); ctx.ellipse(hcx-visorRx*.22, visorY-visorRy*.42, visorRx*.28, visorRy*.22, -0.18, 0, Math.PI*2); ctx.fill();
   ctx.restore();
 
-  // Visor orange bounce-light on dome face
-  ctx.save();
-  ctx.globalAlpha = 0.09 + visorP * 0.05;
-  ctx.fillStyle = rg(hcx, visorY, 4, HR * 1.1, [
-    [0,   'rgba(255,145,20,0.55)'],
-    [0.4, 'rgba(255,80,10,0.12)'],
-    [1,   'transparent']
-  ]);
-  ctx.beginPath();
-  ctx.arc(hcx, hcy, HR, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.save(); ctx.globalAlpha = 0.09 + visorP*.05;
+  ctx.fillStyle = rg(hcx, visorY, 4, HR*1.1, [[0,'rgba(255,145,20,0.55)'],[0.4,'rgba(255,80,10,0.12)'],[1,'transparent']]);
+  ctx.beginPath(); ctx.arc(hcx, hcy, HR, 0, Math.PI*2); ctx.fill(); ctx.restore();
+
+  ctx.save(); ctx.fillStyle = '#1e1e28'; ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 10;
+  ctx.beginPath(); ctx.arc(hcx-HR*.97, hcy, 12*S, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 0.72; ctx.beginPath(); ctx.arc(hcx+HR*.97, hcy, 11*S, 0, Math.PI*2); ctx.fill();
   ctx.restore();
 
-  // Ear pieces
-  ctx.save();
-  ctx.fillStyle   = '#1e1e28';
-  ctx.shadowColor = 'rgba(0,0,0,0.9)';
-  ctx.shadowBlur  = 10;
-  ctx.beginPath();
-  ctx.arc(hcx - HR * 0.97, hcy, 12 * S, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.globalAlpha = 0.72;
-  ctx.beginPath();
-  ctx.arc(hcx + HR * 0.97, hcy, 11 * S, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-
-  // ── Whole-robot warm key light (from right) ──
-  ctx.save();
-  ctx.globalAlpha = 0.065;
-  ctx.fillStyle = rg(torsoX + 90*S, torsoY + 45*S, 10, 240*S, [
-    [0,   'rgba(255,140,30,0.5)'],
-    [0.6, 'rgba(200,80,10,0.1)'],
-    [1,   'transparent']
-  ]);
-  ctx.fillRect(torsoX - 220*S, torsoY - 220*S, 520*S, 620*S);
+  ctx.save(); ctx.globalAlpha = 0.065;
+  ctx.fillStyle = rg(torsoX+90*S, torsoY+45*S, 10, 240*S, [[0,'rgba(255,140,30,0.5)'],[0.6,'rgba(200,80,10,0.1)'],[1,'transparent']]);
+  ctx.fillRect(torsoX-220*S, torsoY-220*S, 520*S, 620*S);
   ctx.restore();
 }
 
 // ════════════════════════════════════════════════════════
-//  POINT CLOUD (dense LiDAR-style, depth-colored)
+//  THREE.JS DOTTED SURFACE
+// ════════════════════════════════════════════════════════
+let threeCtx  = null;
+let scanGrid  = null;
+
+function initThreeDotted() {
+  const SEPARATION = 150;
+  const AMOUNTX    = 40;
+  const AMOUNTY    = 60;
+
+  const scene = new THREE.Scene();
+  scene.fog   = new THREE.FogExp2(0x000000, 0.000095);
+
+  const camera = new THREE.PerspectiveCamera(60, W / H, 1, 10000);
+  camera.position.set(0, 355, 1220);
+
+  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(W, H);
+  renderer.setClearColor(0x000000, 0);
+  threeBg.appendChild(renderer.domElement);
+  threeBg.style.display = 'block';
+  threeBg.style.opacity = '0';
+
+  const positions = [], colors = [];
+  for (let ix = 0; ix < AMOUNTX; ix++) {
+    for (let iy = 0; iy < AMOUNTY; iy++) {
+      positions.push(
+        ix * SEPARATION - (AMOUNTX * SEPARATION) / 2,
+        0,
+        iy * SEPARATION - (AMOUNTY * SEPARATION) / 2
+      );
+      // Teal-cyan gradient front-to-back matching portfolio palette
+      const d = iy / AMOUNTY;
+      colors.push(0.22 + d * 0.08, 0.58 + d * 0.12, 0.62 + d * 0.06);
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('color',    new THREE.Float32BufferAttribute(colors,    3));
+
+  const material = new THREE.PointsMaterial({
+    size: 7, vertexColors: true, transparent: true, opacity: 0.9, sizeAttenuation: true
+  });
+
+  scene.add(new THREE.Points(geometry, material));
+
+  function onResize() {
+    if (!threeCtx) return;
+    threeCtx.camera.aspect = window.innerWidth / window.innerHeight;
+    threeCtx.camera.updateProjectionMatrix();
+    threeCtx.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+  window.addEventListener('resize', onResize);
+
+  threeCtx = { scene, camera, renderer, geometry, count: 0, AMOUNTX, AMOUNTY, onResize };
+}
+
+function renderThreeDotted() {
+  if (!threeCtx) return;
+  const { scene, camera, renderer, geometry, AMOUNTX, AMOUNTY } = threeCtx;
+  const pos = geometry.attributes.position.array;
+  let i = 0;
+  for (let ix = 0; ix < AMOUNTX; ix++) {
+    for (let iy = 0; iy < AMOUNTY; iy++) {
+      pos[i * 3 + 1] =
+        Math.sin((ix + threeCtx.count) * 0.3) * 50 +
+        Math.sin((iy + threeCtx.count) * 0.5) * 50;
+      i++;
+    }
+  }
+  geometry.attributes.position.needsUpdate = true;
+  renderer.render(scene, camera);
+  threeCtx.count += 0.1;
+}
+
+function disposeThreeDotted() {
+  if (!threeCtx) return;
+  window.removeEventListener('resize', threeCtx.onResize);
+  threeCtx.scene.traverse(obj => {
+    if (obj.geometry) obj.geometry.dispose();
+    if (obj.material) {
+      if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+      else obj.material.dispose();
+    }
+  });
+  threeCtx.renderer.dispose();
+  if (threeBg.contains(threeCtx.renderer.domElement))
+    threeBg.removeChild(threeCtx.renderer.domElement);
+  threeBg.style.display = 'none';
+  threeCtx = null;
+}
+
+// ════════════════════════════════════════════════════════
+//  RED-DOT SCAN REVEAL
+// ════════════════════════════════════════════════════════
+const SCAN_CELL = 10; // grid cell size in pixels
+
+function initScan() {
+  // Build a deterministic per-cell brightness grid
+  const cols = Math.ceil(W / SCAN_CELL) + 1;
+  const rows = Math.ceil(H / SCAN_CELL) + 1;
+  const data = new Float32Array(cols * rows);
+  for (let cy = 0; cy < rows; cy++) {
+    for (let cx = 0; cx < cols; cx++) {
+      // Two-layer hash for non-uniform brightness (cell-noise approximation)
+      const a = Math.abs(Math.sin(cx * 127.1 + cy * 311.7));
+      const b = Math.abs(Math.sin(cx * 269.5 + cy *  83.3 + cx * cy * 0.4));
+      data[cy * cols + cx] = a * b; // 0–1, sparse bright spots
+    }
+  }
+  scanGrid = { cols, rows, data };
+
+  // Reveal portfolio — all items instant (scan canvas is the reveal animation)
+  revealPortfolio();
+  document.querySelectorAll('.reveal-item').forEach(el => el.classList.add('in'));
+  document.body.style.overflow = 'hidden'; // keep locked until scan finishes
+
+  // Drop Three.js wave, scan takes over
+  threeBg.style.opacity = '0';
+  setTimeout(disposeThreeDotted, 150);
+
+  cv.style.cursor = 'default';
+}
+
+function drawScanReveal(progress) {
+  const scanY  = progress * H;
+  const CELL   = SCAN_CELL;
+  const cols   = scanGrid.cols;
+  const TRAIL  = CELL * 5; // px above scan that show red trail
+  const FORE   = CELL * 1; // px below scan with forward glow
+
+  // Above scan line: transparent → portfolio shows through
+  if (scanY > 0) ctx.clearRect(0, 0, W, scanY);
+
+  // Below scan line: black overlay
+  if (scanY < H) {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, scanY, W, H - scanY);
+  }
+
+  // Horizontal beam glow at scan line
+  const pulse = 0.5 + 0.5 * Math.sin(T * 10);
+  const beamAlpha = 0.45 + 0.25 * pulse;
+  const beamGrad = ctx.createLinearGradient(0, scanY - 4, 0, scanY + 4);
+  beamGrad.addColorStop(0, 'transparent');
+  beamGrad.addColorStop(0.5, `rgba(255,28,0,${beamAlpha})`);
+  beamGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = beamGrad;
+  ctx.fillRect(0, scanY - 4, W, 8);
+
+  // Dot grid in the scan band
+  const rowStart = Math.max(0, Math.floor((scanY - TRAIL) / CELL));
+  const rowEnd   = Math.min(scanGrid.rows - 1, Math.ceil((scanY + FORE) / CELL));
+
+  ctx.save();
+
+  let lastShadowBlur = -1;
+  let lastShadowColor = '';
+
+  for (let cy = rowStart; cy <= rowEnd; cy++) {
+    const py    = cy * CELL + CELL * 0.5;
+    const distY = py - scanY;
+
+    // Row intensity: bright at scan line, fades upward, tiny forward glow
+    let rowI;
+    if (distY <= 0) {
+      const t = 1 + distY / TRAIL;       // 0→1 as py goes from (scanY-TRAIL) to scanY
+      rowI = t * t;                       // ease-in so trail tapers smoothly
+    } else {
+      rowI = Math.max(0, 1 - distY / FORE) * 0.25;
+    }
+    if (rowI < 0.02) continue;
+
+    // Shadow settings change per row (batch by row to avoid per-dot changes)
+    const heat = distY <= 0 ? rowI : 0.2;
+    const blur = Math.round(3 + heat * 8);
+    const g    = Math.round(heat * 22);
+    const shadowColor = `rgba(255,${g},0,0.9)`;
+
+    if (blur !== lastShadowBlur || shadowColor !== lastShadowColor) {
+      ctx.shadowBlur  = blur;
+      ctx.shadowColor = shadowColor;
+      lastShadowBlur  = blur;
+      lastShadowColor = shadowColor;
+    }
+
+    for (let cx = 0; cx < cols; cx++) {
+      const brightness = scanGrid.data[cy * cols + cx];
+      // Add per-frame shimmer so dots pulse at the scan line
+      const shimmer = 0.75 + 0.25 * Math.sin(T * 7 + cx * 0.37 + cy * 0.53);
+      const intensity = brightness * rowI * shimmer;
+      if (intensity < 0.05) continue;
+
+      const px   = cx * CELL + CELL * 0.5;
+      const dotR = CELL * 0.24 * (0.6 + 0.4 * brightness);
+
+      ctx.globalAlpha = Math.min(1, intensity * 1.6);
+      ctx.fillStyle   = `rgb(255,${g},0)`;
+      ctx.beginPath();
+      ctx.arc(px, py, dotR, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  ctx.restore();
+  ctx.globalAlpha = 1;
+  ctx.shadowBlur  = 0;
+}
+
+// ════════════════════════════════════════════════════════
+//  POINT CLOUD
 // ════════════════════════════════════════════════════════
 const CLOUD_N = 7500;
 const cloud = [];
 
-// We'll initialise lazily when transitioning to 'cloud' phase
 function initCloud() {
   cloud.length = 0;
   for (let i = 0; i < CLOUD_N; i++) {
-    // 3D coordinates: x, y spread over scene; z = depth (1=near … 8=far)
     const z  = 1 + Math.random() * 7;
     const nx = (Math.random() - 0.5) * 2.4;
     const ny = (Math.random() - 0.7) * 2.0;
-
-    // Depth-based color (matching LiDAR reference):
-    //  near (z<2.5) → teal/cyan
-    //  mid  (z<5)   → green/yellow-green
-    //  far          → magenta/pink
     let col;
-    if      (z < 2.5) col = `hsl(${170 + nx*20},100%,${52 + Math.random()*18}%)`;
-    else if (z < 5.0) col = `hsl(${95  + ny*15},100%,${48 + Math.random()*20}%)`;
-    else              col = `hsl(${305 + nx*25},100%,${50 + Math.random()*20}%)`;
-
-    cloud.push({
-      ox: nx, oy: ny, z,  // original
-      x: nx, y: ny,       // current (animated)
-      col,
-      // target: set later during 'reform' phase
-      tx: nx, ty: ny,
-      // scatter velocity
-      vx: (Math.random() - 0.5) * 0.008,
-      vy: (Math.random() - 0.5) * 0.006,
-      // size modifier
-      sr: 0.4 + Math.random() * 0.8,
-      // reform weight (each point moves slightly differently)
-      speed: 0.04 + Math.random() * 0.06
-    });
+    if      (z < 2.5) col = `hsl(${170+nx*20},100%,${52+Math.random()*18}%)`;
+    else if (z < 5.0) col = `hsl(${95+ny*15},100%,${48+Math.random()*20}%)`;
+    else              col = `hsl(${305+nx*25},100%,${50+Math.random()*20}%)`;
+    cloud.push({ ox:nx, oy:ny, z, x:nx, y:ny, col, tx:nx, ty:ny,
+      vx:(Math.random()-.5)*.008, vy:(Math.random()-.5)*.006,
+      sr:0.4+Math.random()*.8, speed:0.04+Math.random()*.06 });
   }
 }
 
 function buildReformTargets() {
-  // Map cloud points to website element regions
-  // Regions defined as normalised (nx,ny) in [-1.2..1.2, -1.0..0.7]
-  // matching what the cloud covers
   const regions = [
-    // Nav bar (top strip)
-    { nx: 0, ny: -0.88, sx: 2.2, sy: 0.06, weight: 0.06 },
-    // Hero "Hello, I'm Edmund" (large text, left half)
-    { nx: -0.5, ny: -0.58, sx: 0.9, sy: 0.18, weight: 0.12 },
-    // Hero bio text
-    { nx: -0.5, ny: -0.32, sx: 0.85, sy: 0.16, weight: 0.08 },
-    // Headshot frame (right side hero)
-    { nx: 0.52, ny: -0.52, sx: 0.28, sy: 0.32, weight: 0.06 },
-    // Project card 1
-    { nx: -0.55, ny: 0.10, sx: 0.28, sy: 0.30, weight: 0.12 },
-    // Project card 2
-    { nx: 0.02,  ny: 0.10, sx: 0.28, sy: 0.30, weight: 0.12 },
-    // Project card 3
-    { nx: 0.58,  ny: 0.10, sx: 0.28, sy: 0.30, weight: 0.12 },
-    // Writing list
-    { nx: -0.1,  ny: 0.55, sx: 1.1,  sy: 0.28, weight: 0.10 },
-    // About section
-    { nx: -0.1,  ny: 0.82, sx: 1.0,  sy: 0.22, weight: 0.08 },
-    // Footer
-    { nx: 0, ny: 0.96, sx: 2.0, sy: 0.04, weight: 0.04 },
+    { nx:0,    ny:-0.88, sx:2.2,  sy:0.06, weight:0.06 },
+    { nx:-0.5, ny:-0.58, sx:0.9,  sy:0.18, weight:0.12 },
+    { nx:-0.5, ny:-0.32, sx:0.85, sy:0.16, weight:0.08 },
+    { nx:0.52, ny:-0.52, sx:0.28, sy:0.32, weight:0.06 },
+    { nx:-0.55,ny:0.10,  sx:0.28, sy:0.30, weight:0.12 },
+    { nx:0.02, ny:0.10,  sx:0.28, sy:0.30, weight:0.12 },
+    { nx:0.58, ny:0.10,  sx:0.28, sy:0.30, weight:0.12 },
+    { nx:-0.1, ny:0.55,  sx:1.1,  sy:0.28, weight:0.10 },
+    { nx:-0.1, ny:0.82,  sx:1.0,  sy:0.22, weight:0.08 },
+    { nx:0,    ny:0.96,  sx:2.0,  sy:0.04, weight:0.04 },
   ];
-
-  // Normalize weights
-  const total = regions.reduce((s, r) => s + r.weight, 0);
-  const cumWeights = [];
-  let cum = 0;
-  for (const r of regions) { cum += r.weight / total; cumWeights.push(cum); }
-
+  const total = regions.reduce((s,r) => s+r.weight, 0);
+  const cumW = []; let cum = 0;
+  for (const r of regions) { cum += r.weight/total; cumW.push(cum); }
   for (const p of cloud) {
-    // Pick a target region probabilistically
-    const rv = Math.random();
-    let ri = 0;
-    for (let k = 0; k < cumWeights.length; k++) {
-      if (rv < cumWeights[k]) { ri = k; break; }
-    }
+    const rv = Math.random(); let ri = 0;
+    for (let k = 0; k < cumW.length; k++) { if (rv < cumW[k]) { ri=k; break; } }
     const reg = regions[ri];
-    p.tx = reg.nx + (Math.random() - 0.5) * reg.sx;
-    p.ty = reg.ny + (Math.random() - 0.5) * reg.sy;
+    p.tx = reg.nx + (Math.random()-.5)*reg.sx;
+    p.ty = reg.ny + (Math.random()-.5)*reg.sy;
   }
 }
 
-function drawCloud(t, reformProgress /* 0=scatter, 1=fully reformed */) {
-  const CX = W / 2;
-  const CY = H / 2;
-  const FOV = H * 0.65;
-
+function drawCloud(t, reformProgress) {
+  const CX = W/2, CY = H/2, FOV = H*.65;
   for (const p of cloud) {
-    // During reform, lerp each point toward its target
     if (reformProgress > 0) {
       const sp = p.speed * reformProgress;
-      p.x += (p.tx - p.x) * sp;
-      p.y += (p.ty - p.y) * sp;
+      p.x += (p.tx-p.x)*sp; p.y += (p.ty-p.y)*sp;
     } else {
-      // Float gently
       p.x += p.vx; p.y += p.vy;
-      if (Math.abs(p.x) > 1.4) p.vx *= -1;
-      if (Math.abs(p.y) > 1.1) p.vy *= -1;
+      if (Math.abs(p.x)>1.4) p.vx*=-1;
+      if (Math.abs(p.y)>1.1) p.vy*=-1;
     }
-
-    // Perspective project
-    const z   = p.z;
-    const sx  = CX + p.x * FOV / z;
-    const sy  = CY + p.y * FOV / z;
-    const rad = (p.sr * 1.1) / (z * 0.6);
-
-    if (sx < -2 || sx > W + 2 || sy < -2 || sy > H + 2) continue;
-
-    ctx.globalAlpha = Math.min(1, (0.55 + 0.45 * (1 - z / 8)));
-    ctx.fillStyle   = p.col;
-    ctx.shadowColor = p.col;
-    ctx.shadowBlur  = z < 3 ? 3 : 1;
-    ctx.beginPath();
-    ctx.arc(sx, sy, Math.max(0.4, rad), 0, Math.PI * 2);
-    ctx.fill();
+    const z=p.z, sx=CX+p.x*FOV/z, sy=CY+p.y*FOV/z;
+    const rad=(p.sr*1.1)/(z*.6);
+    if (sx<-2||sx>W+2||sy<-2||sy>H+2) continue;
+    ctx.globalAlpha = Math.min(1,(0.55+0.45*(1-z/8)));
+    ctx.fillStyle = p.col; ctx.shadowColor = p.col; ctx.shadowBlur = z<3?3:1;
+    ctx.beginPath(); ctx.arc(sx, sy, Math.max(0.4,rad), 0, Math.PI*2); ctx.fill();
   }
-  ctx.globalAlpha = 1;
-  ctx.shadowBlur  = 0;
+  ctx.globalAlpha = 1; ctx.shadowBlur = 0;
 }
 
 // ════════════════════════════════════════════════════════
@@ -947,125 +1026,104 @@ function revealPortfolio() {
   skipBtn.style.display = 'none';
 
   const items = document.querySelectorAll('.reveal-item');
-  items.forEach((el, i) => {
-    setTimeout(() => el.classList.add('in'), 60 + i * 150);
-  });
+  items.forEach((el, i) => setTimeout(() => el.classList.add('in'), 60 + i*150));
+
+  window.addEventListener('scroll', () => {
+    const bar = document.getElementById('progress-bar');
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    if (bar) bar.style.width = (total > 0 ? (window.scrollY/total)*100 : 0) + '%';
+  }, { passive: true });
+
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks  = document.querySelectorAll('nav ul a');
+  const navObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting)
+        navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#'+e.target.id));
+    });
+  }, { rootMargin: '-20% 0px -75% 0px' });
+  sections.forEach(s => navObs.observe(s));
 }
 
 // ════════════════════════════════════════════════════════
 //  MAIN LOOP
 // ════════════════════════════════════════════════════════
-let spinStart  = 0;
-let blackStart = 0;
-let cloudStart = 0;
-let reformStart = 0;
-let cvAlpha     = 1;
+let spinStart=0, blackStart=0, cloudStart=0, reformStart=0;
 
 function loop(now) {
   if (!prevNow) prevNow = now;
-  const dt = Math.min((now - prevNow) / 1000, 0.05);
-  prevNow  = now;
-  T       += dt;
-  phaseT  += dt;
+  const dt = Math.min((now-prevNow)/1000, 0.05);
+  prevNow = now; T += dt; phaseT += dt;
 
-  // ── ROBOT SCENE ──────────────────────────────
+  // ── ROBOT (waits for click) ───────────────────
   if (phase === 'robot') {
-    ctx.clearRect(0, 0, W, H);
+    ctx.clearRect(0,0,W,H);
     drawBackground(T);
     drawRobot(T);
 
-    // After 5s → start spin
-    if (phaseT > 5.0) {
-      phase     = 'spin';
-      spinStart = T;
-      phaseT    = 0;
+    // "click to enter" text — fades in after 2.5s, pulses
+    if (phaseT > 2.5) {
+      const alpha = Math.min(1, (phaseT-2.5)/0.8);
+      const pulse = 0.65 + 0.35 * Math.sin(T * 1.8);
+      const fs = Math.round(11 * (H/800));
+      ctx.save();
+      ctx.globalAlpha = alpha * pulse;
+      ctx.fillStyle   = '#ffffff';
+      ctx.font        = `${fs}px 'JetBrains Mono', monospace`;
+      ctx.textAlign   = 'center';
+      ctx.shadowColor = 'rgba(255,255,255,0.4)';
+      ctx.shadowBlur  = 12;
+      ctx.fillText('[ click to enter ]', W/2, H*0.88);
+      ctx.restore();
     }
   }
 
   // ── SPIN TRANSITION ──────────────────────────
   if (phase === 'spin') {
-    const prog = Math.min(1, phaseT / 2.0); // 2s spin
-    const angle = prog * Math.PI * 2;        // 360 deg
-    const sc    = 1 - prog * 0.9;            // zoom down to 0.1×
-
-    ctx.clearRect(0, 0, W, H);
+    const prog = Math.min(1, phaseT/2.0);
+    const angle = prog * Math.PI * 2;
+    const sc    = 1 - prog * 0.9;
+    ctx.clearRect(0,0,W,H);
     ctx.save();
-    ctx.translate(W / 2, H / 2);
-    ctx.rotate(angle);
-    ctx.scale(sc, sc);
-    ctx.translate(-W / 2, -H / 2);
-    drawBackground(T);
-    drawRobot(T);
+    const pivotX = W*0.52, pivotY = H*0.47;
+    ctx.translate(pivotX, pivotY);
+    ctx.rotate(angle); ctx.scale(sc, sc);
+    ctx.translate(-pivotX, -pivotY);
+    drawBackground(T); drawRobot(T);
     ctx.restore();
-
-    // Fade to black in second half
     if (prog > 0.45) {
-      const bk = (prog - 0.45) / 0.55;
-      ctx.fillStyle = `rgba(0,0,0,${bk * bk})`;
-      ctx.fillRect(0, 0, W, H);
+      const bk = (prog-0.45)/0.55;
+      ctx.fillStyle = `rgba(0,0,0,${bk*bk})`; ctx.fillRect(0,0,W,H);
     }
-
     if (prog >= 1) {
-      ctx.fillStyle = '#000';
-      ctx.fillRect(0, 0, W, H);
-      phase     = 'black';
-      blackStart = T;
-      phaseT    = 0;
+      ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+      phase='black'; blackStart=T; phaseT=0;
     }
   }
 
   // ── BLACK HOLD ────────────────────────────────
   if (phase === 'black') {
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, W, H);
-
-    if (phaseT > 0.55) {
-      initCloud();
-      phase     = 'cloud';
-      cloudStart = T;
-      phaseT    = 0;
-    }
+    ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+    if (phaseT > 0.55) { initThreeDotted(); phase='cloud'; cloudStart=T; phaseT=0; }
   }
 
   // ── POINT CLOUD ───────────────────────────────
   if (phase === 'cloud') {
-    // Fade from black
-    const fadeIn = Math.min(1, phaseT / 0.8);
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, W, H);
-    ctx.globalAlpha = fadeIn;
-    drawCloud(T, 0);
-    ctx.globalAlpha = 1;
-
+    ctx.clearRect(0,0,W,H);
+    renderThreeDotted();
+    threeBg.style.opacity = Math.min(1, phaseT / 0.8);
     if (phaseT > 3.2) {
-      // Build targets and start reforming
-      buildReformTargets();
-      // Show portfolio underneath (transparent) so points can converge to it
-      revealPortfolio();
-      phase      = 'reform';
-      reformStart = T;
-      phaseT     = 0;
+      initScan();
+      phase='scan'; phaseT=0;
     }
   }
 
-  // ── REFORM (points fly to website layout) ─────
-  if (phase === 'reform') {
-    const prog = Math.min(1, phaseT / 2.5);
-
-    // Darken background to the portfolio bg colour
-    ctx.fillStyle = `rgba(15,15,15,${prog * prog * 0.85})`;
-    ctx.fillRect(0, 0, W, H);
-
-    // Point cloud with reform progress
-    ctx.globalAlpha = Math.max(0, 1 - prog * prog);
-    if (ctx.globalAlpha > 0.01) drawCloud(T, prog * 0.6);
-    ctx.globalAlpha = 1;
-
-    // Canvas overlay fades out as portfolio reveals
-    cvAlpha = 1 - prog * prog;
-    cv.style.opacity = cvAlpha;
-
+  // ── SCAN REVEAL ────────────────────────────────
+  if (phase === 'scan') {
+    const prog = Math.min(1, phaseT / 3.5);
+    drawScanReveal(prog);
     if (prog >= 1) {
+      document.body.style.overflow = 'auto';
       cv.style.display = 'none';
       phase = 'done';
     }
@@ -1074,13 +1132,21 @@ function loop(now) {
   if (phase !== 'done') requestAnimationFrame(loop);
 }
 
-// ── SKIP ──────────────────────────────────────
-skipBtn.addEventListener('click', () => {
-  if (phase === 'done') return;
-  phase = 'done';
-  cv.style.display = 'none';
-  revealPortfolio();
+// ── CANVAS CLICK → advance from robot phase ──
+cv.addEventListener('click', () => {
+  if (phase === 'robot') { phase='spin'; spinStart=T; phaseT=0; }
 });
+
+// ── SKIP (button + keyboard) ──────────────────
+function doSkip() {
+  if (phase === 'done') return;
+  disposeThreeDotted();
+  document.body.style.overflow = 'auto';
+  phase = 'done'; cv.style.display='none'; revealPortfolio();
+  document.querySelectorAll('.reveal-item').forEach(el => el.classList.add('in'));
+}
+skipBtn.addEventListener('click', doSkip);
+document.addEventListener('keydown', e => { if (e.key==='Escape'||e.key===' ') doSkip(); });
 
 requestAnimationFrame(loop);
 </script>
