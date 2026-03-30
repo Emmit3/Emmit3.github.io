@@ -513,46 +513,80 @@ function drawBackground(t) {
 // ════════════════════════════════════════════════════════
 let robotVisorPos = { x: 0, y: 0 };
 
-function drawArmSegment(x1, y1, x2, y2, r1, r2) {
-  const dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy)||1;
-  const nx=-dy/len, ny=dx/len;
+// 3D sphere: radial gradient with offset highlight + specular blob
+function drawSphere(x, y, r, c0, cMid, cEdge) {
   ctx.save();
-  ctx.shadowColor='rgba(0,0,0,0.35)'; ctx.shadowBlur=8;
-  const g=ctx.createLinearGradient(x1+nx*r1,y1+ny*r1,x1-nx*r1,y1-ny*r1);
-  g.addColorStop(0,'#c8c8d2'); g.addColorStop(0.45,'#e8e8f0'); g.addColorStop(1,'#909098');
-  ctx.fillStyle=g;
+  ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = r * 1.1;
+  const g = ctx.createRadialGradient(x - r*.38, y - r*.38, r*.03, x + r*.08, y + r*.1, r * 1.06);
+  g.addColorStop(0, c0); g.addColorStop(0.42, cMid); g.addColorStop(1, cEdge);
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill();
+  // Specular blob upper-left
+  ctx.shadowBlur = 0;
+  const sp = ctx.createRadialGradient(x - r*.44, y - r*.46, 0, x - r*.28, y - r*.3, r * .54);
+  sp.addColorStop(0, 'rgba(255,255,255,0.88)'); sp.addColorStop(1, 'transparent');
+  ctx.globalAlpha = 0.52; ctx.fillStyle = sp;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+function drawJoint(x, y, r) {
+  drawSphere(x, y, r, '#ffe86a', '#ff9200', '#bb3c00');
+}
+
+// True cylindrical tube — uses arc-based shape so ends are perfectly rounded
+function drawCylinder(x1, y1, x2, y2, r) {
+  const dx = x2-x1, dy = y2-y1, len = Math.sqrt(dx*dx+dy*dy)||1;
+  const ux = dx/len, uy = dy/len;
+  const px = -uy * r, py = ux * r; // perpendicular
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 12;
+  // Cross-section gradient: dark edge → highlight → lit → shadow edge
+  const g = ctx.createLinearGradient(x1+px, y1+py, x1-px, y1-py);
+  g.addColorStop(0,    '#a8a8b4');
+  g.addColorStop(0.18, '#d8d8e6');
+  g.addColorStop(0.42, '#f4f4fc');
+  g.addColorStop(0.62, '#e2e2ec');
+  g.addColorStop(1,    '#8c8c98');
+  ctx.fillStyle = g;
   ctx.beginPath();
-  ctx.moveTo(x1+nx*r1,y1+ny*r1);
-  ctx.lineTo(x2+nx*r2,y2+ny*r2);
-  ctx.lineTo(x2-nx*r2,y2-ny*r2);
-  ctx.lineTo(x1-nx*r1,y1-ny*r1);
+  ctx.arc(x1, y1, r, Math.atan2(-py,-px), Math.atan2(py, px), true);
+  ctx.arc(x2, y2, r, Math.atan2( py, px), Math.atan2(-py,-px), true);
   ctx.closePath(); ctx.fill();
-  ctx.beginPath(); ctx.arc(x1,y1,r1,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(x2,y2,r2,0,Math.PI*2); ctx.fill();
+  // Highlight gloss stripe along top of tube
+  ctx.shadowBlur = 0; ctx.globalAlpha = 0.3;
+  const hg = ctx.createLinearGradient(x1+px*.22, y1+py*.22, x1-px*.22, y1-py*.22);
+  hg.addColorStop(0, 'transparent'); hg.addColorStop(0.5, 'rgba(255,255,255,0.8)'); hg.addColorStop(1,'transparent');
+  ctx.fillStyle = hg;
+  ctx.beginPath();
+  ctx.arc(x1, y1, r*.62, Math.atan2(-py,-px), Math.atan2(py,px), true);
+  ctx.arc(x2, y2, r*.62, Math.atan2(py,px), Math.atan2(-py,-px), true);
+  ctx.closePath(); ctx.fill();
   ctx.restore();
 }
 
-function drawOrangeJoint(x, y, r) {
-  ctx.save();
-  ctx.shadowColor='#ff8800'; ctx.shadowBlur=10;
-  const g=ctx.createRadialGradient(x-r*.35,y-r*.35,r*.05,x,y,r);
-  g.addColorStop(0,'#ffe044'); g.addColorStop(0.5,'#ff9500'); g.addColorStop(1,'#b84400');
-  ctx.fillStyle=g;
-  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
-  ctx.restore();
-}
-
+// Metallic C-claw with shadow pass + silver pass + specular
 function drawClaw(wx, wy, dir, S) {
-  const r=16*S;
+  const r = 18*S;
   ctx.save();
-  ctx.shadowColor='rgba(0,0,0,0.4)'; ctx.shadowBlur=6;
-  ctx.strokeStyle='#b4b4be'; ctx.lineWidth=5*S; ctx.lineCap='round';
-  for (let i=0; i<2; i++) {
-    const oy=(i-0.5)*13*S, ox=dir*4*S;
-    ctx.beginPath();
-    if (dir<0) ctx.arc(wx+ox,wy+oy,r,-Math.PI*.65,Math.PI*.65);
-    else       ctx.arc(wx+ox,wy+oy,r, Math.PI*.35,Math.PI*1.65);
-    ctx.stroke();
+  for (let i = 0; i < 2; i++) {
+    const oy = (i - 0.5)*15*S, ox = dir*5*S;
+    const startA = dir < 0 ? -Math.PI*.64 : Math.PI*.36;
+    const endA   = dir < 0 ?  Math.PI*.64 : Math.PI*1.64;
+    // Shadow backing
+    ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 8;
+    ctx.strokeStyle = 'rgba(40,40,52,0.9)'; ctx.lineWidth = 8.5*S; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(wx+ox, wy+oy, r, startA, endA); ctx.stroke();
+    // Main silver
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = '#c8c8d6'; ctx.lineWidth = 6*S;
+    ctx.beginPath(); ctx.arc(wx+ox, wy+oy, r, startA, endA); ctx.stroke();
+    // Bright specular highlight arc
+    ctx.globalAlpha = 0.55;
+    ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 2*S;
+    const hS = dir < 0 ? -Math.PI*.58 : Math.PI*.42;
+    const hE = dir < 0 ? -Math.PI*.08 : Math.PI*.92;
+    ctx.beginPath(); ctx.arc(wx+ox + dir*(-r*.12), wy+oy - r*.1, r*.84, hS, hE); ctx.stroke();
   }
   ctx.restore();
 }
@@ -563,7 +597,7 @@ function drawClaw(wx, wy, dir, S) {
 function drawRobot(t) {
   const S = Math.min(W, H) / 900;
 
-  // Slide in from above on first entry
+  // Slide in from above on entry
   const entryProg = Math.min(1, phaseT / 1.1);
   const entryEase = 1 - Math.pow(1 - entryProg, 3);
   const entryOff  = (1 - entryEase) * (-H * 0.55);
@@ -572,146 +606,213 @@ function drawRobot(t) {
   const cx = W * 0.5;
   const cy = H * 0.50 + bob + entryOff;
 
+  // ── GROUND SHADOW ─────────────────────────────
+  ctx.save();
+  const sdw = ctx.createRadialGradient(cx, cy+168*S, 0, cx, cy+168*S, 88*S);
+  sdw.addColorStop(0, 'rgba(0,0,0,0.48)'); sdw.addColorStop(1, 'transparent');
+  ctx.fillStyle = sdw;
+  ctx.beginPath(); ctx.ellipse(cx, cy+168*S, 80*S, 15*S, 0, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+
   // ── HOVER RINGS ────────────────────────────────
   for (let i = 0; i < 3; i++) {
-    const rp = 0.5 + 0.5 * Math.sin(t * 1.9 + i * 1.1);
+    const rp = 0.5 + 0.5*Math.sin(t*2.0 + i*1.1);
     ctx.save();
-    ctx.globalAlpha = (0.38 - i*0.1) * rp;
-    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5*S;
+    ctx.globalAlpha = (0.52 - i*0.14) * rp;
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = (3 - i*0.65)*S;
+    ctx.shadowColor = 'rgba(255,255,255,0.3)'; ctx.shadowBlur = 10;
     ctx.beginPath();
-    ctx.ellipse(cx, cy+155*S+i*14*S, (68-i*14)*S, (9-i*2)*S, 0, 0, Math.PI*2);
+    ctx.ellipse(cx, cy+152*S + i*16*S, (76-i*18)*S, (10-i*2.5)*S, 0, 0, Math.PI*2);
     ctx.stroke();
     ctx.restore();
   }
 
-  // ── WAVING ARM (screen-left) ───────────────────
-  const waBase = { x: cx-72*S, y: cy-48*S };
-  const waA1   = -Math.PI/3 - Math.sin(t*3.2)*0.40;
-  const waA2   = waA1 + 0.9 + Math.sin(t*3.2+0.5)*0.22;
-  const waEX   = waBase.x + Math.cos(waA1)*56*S;
-  const waEY   = waBase.y + Math.sin(waA1)*56*S;
-  const waWX   = waEX + Math.cos(waA2)*50*S;
-  const waWY   = waEY + Math.sin(waA2)*50*S;
-  drawArmSegment(waBase.x,waBase.y,waEX,waEY,12*S,10*S);
-  drawArmSegment(waEX,waEY,waWX,waWY,10*S,8*S);
-  drawOrangeJoint(waWX,waWY,11*S);
-  drawClaw(waWX,waWY,-1,S);
+  // ── ARM GEOMETRY ──────────────────────────────
+  const wave  = Math.sin(t * 3.1);
+  // Left arm on screen (waving)
+  const waShX = cx - 76*S, waShY = cy - 54*S;
+  const waA1  = -Math.PI*.50 + wave*.32;
+  const waElX = waShX + Math.cos(waA1)*62*S;
+  const waElY = waShY + Math.sin(waA1)*62*S;
+  const waA2  = waA1 - 0.52 + wave*.14;
+  const waWrX = waElX + Math.cos(waA2)*54*S;
+  const waWrY = waElY + Math.sin(waA2)*54*S;
+  // Right arm on screen (relaxed)
+  const laShX = cx + 76*S, laShY = cy - 52*S;
+  const laA1  = Math.PI*.20;
+  const laElX = laShX + Math.cos(laA1)*58*S;
+  const laElY = laShY + Math.sin(laA1)*58*S;
+  const laA2  = laA1 + 0.50;
+  const laWrX = laElX + Math.cos(laA2)*50*S;
+  const laWrY = laElY + Math.sin(laA2)*50*S;
 
-  // ── LOWER ARM (screen-right) ───────────────────
-  const laBase = { x: cx+72*S, y: cy-45*S };
-  const laA1   = Math.PI/5 + Math.sin(t*0.9)*0.06;
-  const laA2   = laA1 + 0.6;
-  const laEX   = laBase.x + Math.cos(laA1)*52*S;
-  const laEY   = laBase.y + Math.sin(laA1)*52*S;
-  const laWX   = laEX + Math.cos(laA2)*46*S;
-  const laWY   = laEY + Math.sin(laA2)*46*S;
-  drawArmSegment(laBase.x,laBase.y,laEX,laEY,12*S,10*S);
-  drawArmSegment(laEX,laEY,laWX,laWY,10*S,8*S);
-  drawOrangeJoint(laWX,laWY,11*S);
-  drawClaw(laWX,laWY,1,S);
+  // Draw arms behind torso
+  drawCylinder(waShX, waShY, waElX, waElY, 11.5*S);
+  drawJoint(waElX, waElY, 12*S);
+  drawCylinder(waElX, waElY, waWrX, waWrY, 10*S);
+
+  drawCylinder(laShX, laShY, laElX, laElY, 11.5*S);
+  drawJoint(laElX, laElY, 12*S);
+  drawCylinder(laElX, laElY, laWrX, laWrY, 10*S);
 
   // ── TORSO ──────────────────────────────────────
-  const tW=118*S, tH=130*S, tX=cx-tW/2, tY=cy-68*S;
+  const tW = 124*S, tH = 134*S, tX = cx-tW/2, tY = cy-72*S;
   ctx.save();
-  ctx.shadowColor='rgba(0,0,0,0.55)'; ctx.shadowBlur=22;
-  const tg=ctx.createLinearGradient(tX,tY,tX+tW,tY+tH);
-  tg.addColorStop(0,'#f2f2f4'); tg.addColorStop(0.4,'#e6e6ea'); tg.addColorStop(1,'#c4c4cc');
-  ctx.fillStyle=tg; rr(tX,tY,tW,tH,18*S); ctx.fill();
+  ctx.shadowColor = 'rgba(0,0,0,0.52)'; ctx.shadowBlur = 28;
+  // Radial gradient → looks like a convex rounded plastic body
+  const tg = ctx.createRadialGradient(tX+tW*.28, tY+tH*.2, tH*.04, tX+tW*.5, tY+tH*.5, tH*.96);
+  tg.addColorStop(0,   '#f8f8fc');
+  tg.addColorStop(0.32,'#ededf4');
+  tg.addColorStop(0.62,'#dcdce6');
+  tg.addColorStop(1,   '#b6b6c2');
+  ctx.fillStyle = tg; rr(tX, tY, tW, tH, 24*S); ctx.fill();
+  // Rim highlight (top edge)
+  ctx.shadowBlur = 0; ctx.globalAlpha = 0.22;
+  const trh = ctx.createLinearGradient(tX, tY, tX, tY+tH*.4);
+  trh.addColorStop(0,'rgba(255,255,255,0.9)'); trh.addColorStop(1,'transparent');
+  ctx.fillStyle = trh; rr(tX+4*S, tY+3*S, tW-8*S, tH*.44, 20*S); ctx.fill();
   ctx.restore();
 
-  // Chest panel
+  // Chest panel (dark recessed stripe)
   ctx.save();
-  ctx.fillStyle='#8a8a96'; ctx.shadowColor='rgba(0,0,0,0.35)'; ctx.shadowBlur=6;
-  rr(cx-30*S,tY+38*S,60*S,20*S,5*S); ctx.fill();
+  ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 6;
+  const cpg = ctx.createLinearGradient(cx-36*S,0,cx+36*S,0);
+  cpg.addColorStop(0,'#72728a'); cpg.addColorStop(0.5,'#92929e'); cpg.addColorStop(1,'#606078');
+  ctx.fillStyle = cpg; rr(cx-36*S, tY+34*S, 72*S, 20*S, 5*S); ctx.fill();
+  // Subtle gloss on panel
+  ctx.globalAlpha = 0.18;
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  rr(cx-34*S, tY+35*S, 68*S, 7*S, 3*S); ctx.fill();
   ctx.restore();
 
-  // Waist ring
+  // Waist connector
   ctx.save();
-  const wring=ctx.createLinearGradient(cx-26*S,0,cx+26*S,0);
-  wring.addColorStop(0,'#8888a0'); wring.addColorStop(0.5,'#aaaabf'); wring.addColorStop(1,'#707088');
-  ctx.fillStyle=wring; ctx.shadowColor='rgba(0,0,0,0.4)'; ctx.shadowBlur=8;
-  rr(cx-26*S,tY+tH-14*S,52*S,28*S,10*S); ctx.fill();
+  ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = 10;
+  const wcg = ctx.createLinearGradient(cx-26*S,0,cx+26*S,0);
+  wcg.addColorStop(0,'#7c7c8e'); wcg.addColorStop(0.5,'#9e9eae'); wcg.addColorStop(1,'#6a6a7a');
+  ctx.fillStyle = wcg; rr(cx-26*S, tY+tH-18*S, 52*S, 32*S, 11*S); ctx.fill();
   ctx.restore();
 
   // ── SHOULDER JOINTS ────────────────────────────
-  drawOrangeJoint(cx-62*S, cy-55*S, 15*S);
-  drawOrangeJoint(cx+62*S, cy-55*S, 15*S);
+  drawJoint(cx-67*S, cy-60*S, 18*S);
+  drawJoint(cx+67*S, cy-60*S, 18*S);
+
+  // ── WRIST JOINTS + CLAWS ──────────────────────
+  drawJoint(waWrX, waWrY, 13*S);
+  drawClaw(waWrX, waWrY, -1, S);
+  drawJoint(laWrX, laWrY, 13*S);
+  drawClaw(laWrX, laWrY, 1, S);
 
   // ── NECK ───────────────────────────────────────
   ctx.save();
-  ctx.fillStyle='#c8c8d4'; ctx.shadowColor='rgba(0,0,0,0.3)'; ctx.shadowBlur=6;
-  rr(cx-11*S,cy-82*S,22*S,22*S,5*S); ctx.fill();
+  ctx.shadowColor = 'rgba(0,0,0,0.32)'; ctx.shadowBlur = 7;
+  const ng = ctx.createLinearGradient(cx-13*S,0,cx+13*S,0);
+  ng.addColorStop(0,'#b8b8c8'); ng.addColorStop(0.5,'#d4d4e0'); ng.addColorStop(1,'#a8a8b8');
+  ctx.fillStyle = ng; rr(cx-13*S, cy-86*S, 26*S, 24*S, 6*S); ctx.fill();
   ctx.restore();
 
   // ── HEAD ───────────────────────────────────────
-  const hW=162*S, hH=98*S, hX=cx-hW/2, hY=cy-168*S;
+  const hW = 174*S, hH = 104*S, hX = cx-hW/2, hY = cy-178*S;
   ctx.save();
-  ctx.shadowColor='rgba(0,0,0,0.6)'; ctx.shadowBlur=28;
-  const hg=ctx.createLinearGradient(hX,hY,hX+hW,hY+hH);
-  hg.addColorStop(0,'#f6f6f8'); hg.addColorStop(0.5,'#eaeaed'); hg.addColorStop(1,'#ccccD2');
-  ctx.fillStyle=hg; rr(hX,hY,hW,hH,34*S); ctx.fill();
-  ctx.restore();
-
-  // Head top shine
-  ctx.save(); ctx.globalAlpha=0.18;
-  const hs=ctx.createLinearGradient(hX,hY,hX,hY+hH*0.55);
-  hs.addColorStop(0,'rgba(255,255,255,0.9)'); hs.addColorStop(1,'transparent');
-  ctx.fillStyle=hs; rr(hX+6*S,hY+5*S,hW-12*S,hH*0.48,28*S); ctx.fill();
+  ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 35;
+  // Radial gradient for convincing 3D sphere-like head
+  const hg = ctx.createRadialGradient(hX+hW*.27, hY+hH*.22, hH*.03, hX+hW*.5, hY+hH*.5, hW*.82);
+  hg.addColorStop(0,   '#fafafa');
+  hg.addColorStop(0.28,'#f2f2f6');
+  hg.addColorStop(0.58,'#e2e2ea');
+  hg.addColorStop(1,   '#c0c0cc');
+  ctx.fillStyle = hg; rr(hX, hY, hW, hH, 40*S); ctx.fill();
+  // Specular blob
+  ctx.shadowBlur = 0; ctx.globalAlpha = 0.32;
+  const hsp = ctx.createRadialGradient(hX+hW*.24, hY+hH*.18, 0, hX+hW*.24, hY+hH*.18, hW*.36);
+  hsp.addColorStop(0,'rgba(255,255,255,0.95)'); hsp.addColorStop(1,'transparent');
+  ctx.fillStyle = hsp; rr(hX, hY, hW, hH, 40*S); ctx.fill();
   ctx.restore();
 
   // ── ANTENNA ────────────────────────────────────
   ctx.save();
-  ctx.strokeStyle='#d8d8e0'; ctx.lineWidth=4*S; ctx.lineCap='round';
-  ctx.beginPath(); ctx.moveTo(cx,hY); ctx.lineTo(cx,hY-28*S); ctx.stroke();
+  ctx.strokeStyle = '#ccccda'; ctx.lineWidth = 5*S; ctx.lineCap = 'round';
+  ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 5;
+  ctx.beginPath(); ctx.moveTo(cx, hY); ctx.lineTo(cx, hY-34*S); ctx.stroke();
   ctx.restore();
-  drawOrangeJoint(cx, hY-28*S, 13*S);
+  drawJoint(cx, hY-34*S, 16*S);
 
   // ── EAR KNOBS ──────────────────────────────────
-  drawOrangeJoint(hX-5*S, hY+hH*0.5, 11*S);
-  drawOrangeJoint(hX+hW+5*S, hY+hH*0.5, 11*S);
+  drawJoint(hX-7*S, hY+hH*.50, 14*S);
+  drawJoint(hX+hW+7*S, hY+hH*.50, 14*S);
 
   // ── VISOR ──────────────────────────────────────
-  const vW=128*S, vH=52*S, vX=cx-vW/2, vY=hY+hH*0.28;
+  const vW = 140*S, vH = 54*S, vX = cx-vW/2, vY = hY+hH*.28;
+  // Outer dark frame
   ctx.save();
-  ctx.fillStyle='#06080c'; ctx.shadowColor='rgba(0,0,0,0.8)'; ctx.shadowBlur=4;
-  rr(vX,vY,vW,vH,12*S); ctx.fill();
+  ctx.shadowColor = 'rgba(0,0,0,0.95)'; ctx.shadowBlur = 9;
+  ctx.fillStyle = '#04060c'; rr(vX, vY, vW, vH, 14*S); ctx.fill();
+  ctx.restore();
+  // Inner glass
+  ctx.save();
+  ctx.fillStyle = '#070b14'; rr(vX+3*S, vY+3*S, vW-6*S, vH-6*S, 11*S); ctx.fill();
   ctx.restore();
 
-  // Eyes (two glowing rounded rects)
-  const eyeGlow = 0.82 + 0.18*Math.sin(t*2.2);
-  const eW=vW*0.19, eH=vH*0.33, eY=vY+vH*0.18;
-  const eg=ctx.createLinearGradient(0,eY,0,eY+eH);
-  eg.addColorStop(0,'#ffffff'); eg.addColorStop(1,`rgba(255,215,80,${eyeGlow})`);
-  ctx.save(); ctx.shadowColor='rgba(255,228,100,0.9)'; ctx.shadowBlur=14; ctx.fillStyle=eg;
-  rr(cx-vW*0.30-eW/2, eY, eW, eH, 3*S); ctx.fill(); ctx.restore();
-  ctx.save(); ctx.shadowColor='rgba(255,228,100,0.9)'; ctx.shadowBlur=14; ctx.fillStyle=eg;
-  rr(cx+vW*0.12, eY, eW, eH, 3*S); ctx.fill(); ctx.restore();
+  // Eye geometry
+  const eyeGlow = 0.88 + 0.12*Math.sin(t*2.1);
+  const eW = vW*.198, eH = vH*.36, eY = vY+vH*.14;
+  const eLX = cx - vW*.312 - eW*.5;
+  const eRX = cx + vW*.114;
+
+  // Bloom halo (cast via shadow, invisible fill)
+  ctx.save();
+  ctx.shadowColor = `rgba(255,228,100,${eyeGlow*.95})`; ctx.shadowBlur = 24;
+  ctx.globalAlpha = 0.001; ctx.fillStyle = 'rgba(255,228,100,1)';
+  rr(eLX, eY, eW, eH, 3*S); ctx.fill();
+  rr(eRX, eY, eW, eH, 3*S); ctx.fill();
+  ctx.restore();
+
+  // Eye fills
+  const eyeGd = ctx.createLinearGradient(0, eY, 0, eY+eH);
+  eyeGd.addColorStop(0,   `rgba(255,255,248,${eyeGlow})`);
+  eyeGd.addColorStop(0.5, `rgba(255,222,72,${eyeGlow*.93})`);
+  eyeGd.addColorStop(1,   `rgba(190,122,8,${eyeGlow*.55})`);
+  ctx.save();
+  ctx.shadowColor = 'rgba(255,225,80,0.9)'; ctx.shadowBlur = 16; ctx.fillStyle = eyeGd;
+  rr(eLX, eY, eW, eH, 3*S); ctx.fill();
+  rr(eRX, eY, eW, eH, 3*S); ctx.fill();
+  // Tiny specular dot on each eye
+  ctx.shadowBlur = 0; ctx.globalAlpha = 0.55; ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.beginPath(); ctx.arc(eLX+eW*.22, eY+eH*.18, eH*.12, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(eRX+eW*.22, eY+eH*.18, eH*.12, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
 
   // Smile arc
   ctx.save();
-  ctx.strokeStyle=`rgba(255,220,85,${eyeGlow*0.88})`;
-  ctx.shadowColor='rgba(255,200,80,0.7)'; ctx.shadowBlur=8;
-  ctx.lineWidth=2.5*S; ctx.lineCap='round';
-  ctx.beginPath(); ctx.arc(cx, vY+vH*0.72-5*S, vW*0.195, 0.08, Math.PI-0.08); ctx.stroke();
+  ctx.strokeStyle = `rgba(255,210,55,${eyeGlow*.82})`;
+  ctx.shadowColor = 'rgba(255,195,45,0.72)'; ctx.shadowBlur = 10;
+  ctx.lineWidth = 3*S; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(cx, vY+vH*.76-6*S, vW*.196, 0.1, Math.PI-0.1); ctx.stroke();
   ctx.restore();
 
-  // Visor specular highlight
-  ctx.save(); ctx.globalAlpha=0.13;
-  const vh=ctx.createLinearGradient(vX,vY,vX,vY+vH*0.4);
-  vh.addColorStop(0,'rgba(255,255,255,0.9)'); vh.addColorStop(1,'transparent');
-  ctx.fillStyle=vh; rr(vX+3*S,vY+3*S,vW-6*S,vH*0.38,9*S); ctx.fill();
+  // Visor glass reflections
+  ctx.save();
+  // Diagonal streak
+  ctx.globalAlpha = 0.13;
+  const vrf = ctx.createLinearGradient(vX, vY, vX+vW*.5, vY+vH*.55);
+  vrf.addColorStop(0,'rgba(255,255,255,0.9)');
+  vrf.addColorStop(0.5,'rgba(255,255,255,0.4)');
+  vrf.addColorStop(1,'transparent');
+  ctx.fillStyle = vrf; rr(vX+3*S, vY+3*S, vW*.54, vH*.45, 9*S); ctx.fill();
+  // Top rim highlight line
+  ctx.globalAlpha = 0.2; ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 1.5*S;
+  ctx.beginPath(); ctx.moveTo(vX+15*S, vY+2*S); ctx.lineTo(vX+vW-15*S, vY+2*S); ctx.stroke();
   ctx.restore();
 
-  // Record visor center for zoom-in transition
+  // Store visor centre for zoom transition
   robotVisorPos.x = cx;
-  robotVisorPos.y = vY + vH*0.5;
+  robotVisorPos.y = vY + vH*.5;
 }
 
 // ════════════════════════════════════════════════════════
 //  THREE.JS DOTTED SURFACE
 // ════════════════════════════════════════════════════════
 let threeCtx  = null;
-let scanGrid  = null;
 
 function initThreeDotted() {
   const SEPARATION = 150;
@@ -803,120 +904,166 @@ function disposeThreeDotted() {
 }
 
 // ════════════════════════════════════════════════════════
-//  RED-DOT SCAN REVEAL
+//  RED-DOT SCAN REVEAL  (high-fidelity cellular noise)
 // ════════════════════════════════════════════════════════
-const SCAN_CELL = 10; // grid cell size in pixels
+const SCAN_CELL = 5;  // dot grid cell size – 5px for reference-level density
+const SCAN_FEAT = 5;  // Voronoi feature grid in cell units (controls cluster size)
 
-function initScan() {
-  // Build a deterministic per-cell brightness grid
-  const cols = Math.ceil(W / SCAN_CELL) + 1;
-  const rows = Math.ceil(H / SCAN_CELL) + 1;
-  const data = new Float32Array(cols * rows);
-  for (let cy = 0; cy < rows; cy++) {
-    for (let cx = 0; cx < cols; cx++) {
-      // Two-layer hash for non-uniform brightness (cell-noise approximation)
-      const a = Math.abs(Math.sin(cx * 127.1 + cy * 311.7));
-      const b = Math.abs(Math.sin(cx * 269.5 + cy *  83.3 + cx * cy * 0.4));
-      data[cy * cols + cx] = a * b; // 0–1, sparse bright spots
+let scanState = null; // { dotCanvas, glowCanvas, glowCtx }
+
+// Pre-bake a full-screen dot pattern canvas using Voronoi/Worley noise.
+// Matches the reference's  mx_cell_noise_float × smoothstep(0.5,0.49,dist)
+// but computed once at init time on the CPU.
+function buildVoronoiDots() {
+  const CELL = SCAN_CELL;
+  const FEAT = SCAN_FEAT;
+  const cols = Math.ceil(W / CELL) + 2;
+  const rows = Math.ceil(H / CELL) + 2;
+  const fc   = Math.ceil(cols / FEAT) + 2;
+  const fr   = Math.ceil(rows / FEAT) + 2;
+
+  // Random feature points on a coarser grid (Worley noise seed)
+  const fp = [];
+  for (let fy = 0; fy <= fr; fy++) {
+    fp.push([]);
+    for (let fx = 0; fx <= fc; fx++) {
+      const h1 = Math.abs(Math.sin(fx * 127.1 + fy * 311.7 + 13.7));
+      const h2 = Math.abs(Math.sin(fx * 269.5 + fy * 183.3 + 71.3));
+      fp[fy].push([fx * FEAT + h1 * FEAT * 0.85, fy * FEAT + h2 * FEAT * 0.85]);
     }
   }
-  scanGrid = { cols, rows, data };
 
-  // Reveal portfolio — all items instant (scan canvas is the reveal animation)
+  const dc  = document.createElement('canvas');
+  dc.width  = W; dc.height = H;
+  const dCtx = dc.getContext('2d');
+  dCtx.clearRect(0, 0, W, H);
+
+  for (let cy = 0; cy < rows; cy++) {
+    const gfy = Math.floor(cy / FEAT);
+    for (let cx = 0; cx < cols; cx++) {
+      const gfx = Math.floor(cx / FEAT);
+      let minD = 1e9;
+      // Check 3×3 neighbourhood of feature cells
+      for (let dfy = -1; dfy <= 1; dfy++) {
+        const nfy = gfy + dfy;
+        if (nfy < 0 || nfy > fr) continue;
+        for (let dfx = -1; dfx <= 1; dfx++) {
+          const nfx = gfx + dfx;
+          if (nfx < 0 || nfx > fc) continue;
+          const [px, py] = fp[nfy][nfx];
+          const dx = cx - px, dy = cy - py;
+          minD = Math.min(minD, dx * dx + dy * dy);
+        }
+      }
+      // Worley brightness: high between feature points, low at feature points
+      const brightness = Math.min(1.0, Math.sqrt(minD) / (FEAT * 0.60));
+      if (brightness < 0.10) continue;
+
+      const px = cx * CELL + CELL * 0.5;
+      const py = cy * CELL + CELL * 0.5;
+      dCtx.globalAlpha = brightness;
+      dCtx.fillStyle   = '#fff';
+      dCtx.beginPath();
+      dCtx.arc(px, py, CELL * 0.44, 0, Math.PI * 2);
+      dCtx.fill();
+    }
+  }
+  return dc;
+}
+
+function initScan() {
+  const dotCanvas  = buildVoronoiDots();
+  const glowCanvas = document.createElement('canvas');
+  glowCanvas.width = W; glowCanvas.height = H;
+  scanState = { dotCanvas, glowCanvas, glowCtx: glowCanvas.getContext('2d') };
+
   revealPortfolio();
   document.querySelectorAll('.reveal-item').forEach(el => el.classList.add('in'));
-  document.body.style.overflow = 'hidden'; // keep locked until scan finishes
+  document.body.style.overflow = 'hidden';
 
-  // Drop Three.js wave, scan takes over
   threeBg.style.opacity = '0';
   setTimeout(disposeThreeDotted, 150);
-
   cv.style.cursor = 'default';
 }
 
+function disposeScan() {
+  if (!scanState) return;
+  scanState.dotCanvas.width  = 1;
+  scanState.glowCanvas.width = 1;
+  scanState = null;
+}
+
+// Core rendering — replicates the TSL shader:
+//   brightness = mx_cell_noise_float(...)
+//   dot        = smoothstep(0.5, 0.49, dist) × brightness
+//   flow       = oneMinus(smoothstep(0, 0.02, abs(depth − uProgress)))
+//   mask       = dot × flow × vec3(10,0,0)
+//   final      = blendScreen(tMap, mask)  +  bloom
 function drawScanReveal(progress) {
-  const scanY  = progress * H;
-  const CELL   = SCAN_CELL;
-  const cols   = scanGrid.cols;
-  const TRAIL  = CELL * 5; // px above scan that show red trail
-  const FORE   = CELL * 1; // px below scan with forward glow
+  if (!scanState) return;
+  const { dotCanvas, glowCanvas, glowCtx } = scanState;
+  const scanY = progress * H;
+  const TRAIL = 200;  // px trail above scan line  (replaces depth/flow falloff)
+  const FORE  = 30;   // px forward glow below scan line
 
-  // Above scan line: transparent → portfolio shows through
-  if (scanY > 0) ctx.clearRect(0, 0, W, scanY);
+  // ── Glow canvas: gradient → destination-in dot mask ──────────────────
+  // This is equivalent to dot × flow in the shader:
+  //   gradient defines flow (intensity vs distance from scan)
+  //   dotCanvas masks to dot positions  (equivalent to dot ∈ {0,1} × brightness)
+  glowCtx.clearRect(0, 0, W, H);
 
-  // Below scan line: black overlay
+  const pulse  = 0.85 + 0.15 * Math.sin(T * 14);
+  const topY   = Math.max(0, scanY - TRAIL);
+  const botY   = Math.min(H, scanY + FORE);
+
+  const grad = glowCtx.createLinearGradient(0, topY, 0, botY);
+  grad.addColorStop(0,    'rgba(200,  0, 0, 0)');
+  grad.addColorStop(0.25, `rgba(210,  2, 0, ${0.10 * pulse})`);
+  grad.addColorStop(0.55, `rgba(235,  8, 0, ${0.38 * pulse})`);
+  grad.addColorStop(0.80, `rgba(255, 18, 0, ${0.70 * pulse})`);
+  grad.addColorStop(0.93, `rgba(255, 45, 0, ${0.96 * pulse})`); // peak ~at scan line
+  grad.addColorStop(1.00, `rgba(255, 25, 0, ${0.55 * pulse})`); // forward glow
+
+  glowCtx.fillStyle = grad;
+  glowCtx.fillRect(0, topY, W, botY - topY);
+
+  // Mask gradient to dot positions only (destination-in = keep dst where src is opaque)
+  glowCtx.globalCompositeOperation = 'destination-in';
+  glowCtx.drawImage(dotCanvas, 0, 0);
+  glowCtx.globalCompositeOperation = 'source-over';
+
+  // ── Main canvas: reveal mask ──────────────────────────────────────────
+  ctx.clearRect(0, 0, W, scanY);          // transparent above → portfolio shows through
   if (scanY < H) {
     ctx.fillStyle = '#000';
-    ctx.fillRect(0, scanY, W, H - scanY);
+    ctx.fillRect(0, scanY, W, H - scanY); // black below → portfolio hidden
   }
 
-  // Horizontal beam glow at scan line
-  const pulse = 0.5 + 0.5 * Math.sin(T * 10);
-  const beamAlpha = 0.45 + 0.25 * pulse;
-  const beamGrad = ctx.createLinearGradient(0, scanY - 4, 0, scanY + 4);
-  beamGrad.addColorStop(0, 'transparent');
-  beamGrad.addColorStop(0.5, `rgba(255,28,0,${beamAlpha})`);
-  beamGrad.addColorStop(1, 'transparent');
-  ctx.fillStyle = beamGrad;
-  ctx.fillRect(0, scanY - 4, W, 8);
-
-  // Dot grid in the scan band
-  const rowStart = Math.max(0, Math.floor((scanY - TRAIL) / CELL));
-  const rowEnd   = Math.min(scanGrid.rows - 1, Math.ceil((scanY + FORE) / CELL));
-
+  // Bloom pass: blurred glow canvas (replaces the bloom post-processing node)
   ctx.save();
-
-  let lastShadowBlur = -1;
-  let lastShadowColor = '';
-
-  for (let cy = rowStart; cy <= rowEnd; cy++) {
-    const py    = cy * CELL + CELL * 0.5;
-    const distY = py - scanY;
-
-    // Row intensity: bright at scan line, fades upward, tiny forward glow
-    let rowI;
-    if (distY <= 0) {
-      const t = 1 + distY / TRAIL;       // 0→1 as py goes from (scanY-TRAIL) to scanY
-      rowI = t * t;                       // ease-in so trail tapers smoothly
-    } else {
-      rowI = Math.max(0, 1 - distY / FORE) * 0.25;
-    }
-    if (rowI < 0.02) continue;
-
-    // Shadow settings change per row (batch by row to avoid per-dot changes)
-    const heat = distY <= 0 ? rowI : 0.2;
-    const blur = Math.round(3 + heat * 8);
-    const g    = Math.round(heat * 22);
-    const shadowColor = `rgba(255,${g},0,0.9)`;
-
-    if (blur !== lastShadowBlur || shadowColor !== lastShadowColor) {
-      ctx.shadowBlur  = blur;
-      ctx.shadowColor = shadowColor;
-      lastShadowBlur  = blur;
-      lastShadowColor = shadowColor;
-    }
-
-    for (let cx = 0; cx < cols; cx++) {
-      const brightness = scanGrid.data[cy * cols + cx];
-      // Add per-frame shimmer so dots pulse at the scan line
-      const shimmer = 0.75 + 0.25 * Math.sin(T * 7 + cx * 0.37 + cy * 0.53);
-      const intensity = brightness * rowI * shimmer;
-      if (intensity < 0.05) continue;
-
-      const px   = cx * CELL + CELL * 0.5;
-      const dotR = CELL * 0.24 * (0.6 + 0.4 * brightness);
-
-      ctx.globalAlpha = Math.min(1, intensity * 1.6);
-      ctx.fillStyle   = `rgb(255,${g},0)`;
-      ctx.beginPath();
-      ctx.arc(px, py, dotR, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
+  ctx.filter      = 'blur(6px)';
+  ctx.globalAlpha = 0.70;
+  ctx.drawImage(glowCanvas, 0, 0);
   ctx.restore();
-  ctx.globalAlpha = 1;
-  ctx.shadowBlur  = 0;
+
+  // Second bloom pass at wider radius for outer halo
+  ctx.save();
+  ctx.filter      = 'blur(16px)';
+  ctx.globalAlpha = 0.30;
+  ctx.drawImage(glowCanvas, 0, 0);
+  ctx.restore();
+
+  // Sharp dot pass (crisp foreground dots, no blur)
+  ctx.drawImage(glowCanvas, 0, 0);
+
+  // Scan-line beam (crisp pulsing edge matching the reference's red scan overlay)
+  const beamP  = 0.50 + 0.50 * Math.sin(T * 16);
+  const beamG  = ctx.createLinearGradient(0, scanY - 4, 0, scanY + 4);
+  beamG.addColorStop(0,   'transparent');
+  beamG.addColorStop(0.5, `rgba(255, 75, 0, ${beamP})`);
+  beamG.addColorStop(1,   'transparent');
+  ctx.fillStyle = beamG;
+  ctx.fillRect(0, scanY - 4, W, 8);
 }
 
 // ════════════════════════════════════════════════════════
@@ -1094,11 +1241,12 @@ function loop(now) {
 
   // ── SCAN REVEAL ────────────────────────────────
   if (phase === 'scan') {
-    const prog = Math.min(1, phaseT / 3.5);
+    const prog = Math.min(1, phaseT / 4.0);
     drawScanReveal(prog);
     if (prog >= 1) {
       document.body.style.overflow = 'auto';
       cv.style.display = 'none';
+      disposeScan();
       phase = 'done';
     }
   }
@@ -1115,6 +1263,7 @@ cv.addEventListener('click', () => {
 function doSkip() {
   if (phase === 'done') return;
   disposeThreeDotted();
+  disposeScan();
   document.body.style.overflow = 'auto';
   phase = 'done'; cv.style.display='none'; revealPortfolio();
   document.querySelectorAll('.reveal-item').forEach(el => el.classList.add('in'));
