@@ -437,22 +437,11 @@
     Edmund Tong &nbsp;·&nbsp;
     <a href="https://github.com/Emmit3/Emmit3.github.io" target="_blank" rel="noopener">Source</a>
     &nbsp;·&nbsp; 2026
-    &nbsp;·&nbsp; Photo by <a href="https://unsplash.com/@chrisbrignola" target="_blank" rel="noopener">Chris Brignola</a> / Unsplash
   </footer>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
-// ════════════════════════════════════════════════════════
-//  CINEMATIC BACKGROUND IMAGE
-// ════════════════════════════════════════════════════════
-let bgImage = null;
-(function () {
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = () => { bgImage = img; };
-  img.src = 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=3840&q=85&auto=format&fit=crop';
-})();
 
 // ════════════════════════════════════════════════════════
 //  SETUP
@@ -474,24 +463,6 @@ let T      = 0;
 let prevNow = null;
 let phaseT = 0;
 
-// ════════════════════════════════════════════════════════
-//  PRE-GENERATED BACKGROUND ELEMENTS
-// ════════════════════════════════════════════════════════
-const bgDust = Array.from({ length: 90 }, () => ({
-  nx: Math.random(), ny: Math.random(),
-  r: 0.4 + Math.random() * 2.2,
-  a: 0.04 + Math.random() * 0.22,
-  f: 0.2 + Math.random() * 0.8,
-  ph: Math.random() * Math.PI * 2,
-  warm: Math.random() < 0.5
-}));
-
-const rainDrops = Array.from({ length: 140 }, () => ({
-  nx: Math.random(), ny: Math.random() * 1.2,
-  spd: (3.5 + Math.random() * 4) / 700,
-  len: (10 + Math.random() * 18) / 700,
-  sln: (1.5 + Math.random() * 2) / 700
-}));
 
 // ════════════════════════════════════════════════════════
 //  CANVAS HELPERS
@@ -510,74 +481,78 @@ function rg(cx, cy, r0, r1, stops) {
 //  BACKGROUND
 // ════════════════════════════════════════════════════════
 function drawBackground(t) {
-  ctx.fillStyle = '#030308';
+  // Base warm dark fill matching portfolio --bg
+  ctx.fillStyle = '#1a1510';
   ctx.fillRect(0, 0, W, H);
 
-  if (bgImage) {
-    const iA = bgImage.naturalWidth / bgImage.naturalHeight;
-    const sA = W / H;
-    let dx, dy, dw, dh;
-    if (iA > sA) { dh = H; dw = H * iA; dx = (W - dw) / 2; dy = 0; }
-    else          { dw = W; dh = W / iA; dx = 0; dy = (H - dh) / 2; }
-    ctx.save(); ctx.globalAlpha = 0.38;
-    ctx.drawImage(bgImage, dx, dy, dw, dh);
-    ctx.restore();
-    ctx.fillStyle = 'rgba(3,3,8,0.44)';
-    ctx.fillRect(0, 0, W, H);
-  }
+  // Subtle top vignette — slightly cooler dark
+  const topGrad = ctx.createLinearGradient(0, 0, 0, H * 0.55);
+  topGrad.addColorStop(0, 'rgba(10,8,6,0.55)');
+  topGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = topGrad; ctx.fillRect(0, 0, W, H);
 
-  ctx.fillStyle = rg(W*.76, H*.22, 0, W*.58, [[0,'rgba(255,130,20,0.13)'],[0.5,'rgba(200,70,10,0.05)'],[1,'transparent']]);
-  ctx.fillRect(0,0,W,H);
-  ctx.fillStyle = rg(W*.65, H*.55, 0, W*.40, [[0,'rgba(255,80,10,0.08)'],[1,'transparent']]);
-  ctx.fillRect(0,0,W,H);
-  ctx.fillStyle = rg(0, H*.38, 0, W*.38, [[0,'rgba(0,210,220,0.07)'],[1,'transparent']]);
-  ctx.fillRect(0,0,W,H);
+  // Soft sage-green ambient glow (robot spotlight, centre)
+  ctx.fillStyle = rg(W*0.5, H*0.48, 0, W*0.55,
+    [[0,'rgba(90,122,92,0.07)'],[0.6,'rgba(90,122,92,0.02)'],[1,'transparent']]);
+  ctx.fillRect(0, 0, W, H);
 
-  const fogY = H * 0.52;
-  const fog = ctx.createLinearGradient(0, fogY-50, 0, fogY+90);
-  fog.addColorStop(0,'transparent'); fog.addColorStop(0.45,'rgba(15,8,28,0.28)'); fog.addColorStop(1,'transparent');
-  ctx.fillStyle = fog; ctx.fillRect(0, fogY-50, W, 140);
+  // Warm amber accent — upper-right, very faint
+  ctx.fillStyle = rg(W*0.78, H*0.18, 0, W*0.42,
+    [[0,'rgba(200,130,60,0.06)'],[1,'transparent']]);
+  ctx.fillRect(0, 0, W, H);
 
-  for (const p of bgDust) {
-    ctx.globalAlpha = p.a * (0.35 + 0.65 * Math.sin(t * p.f + p.ph));
-    ctx.fillStyle = p.warm ? '#ff9944' : '#44aacc';
-    ctx.shadowColor = p.warm ? '#ff6600' : '#00aacc'; ctx.shadowBlur = 6;
-    ctx.beginPath();
-    ctx.arc(p.nx*W + Math.sin(t*.25+p.ph)*5, p.ny*H + Math.cos(t*.20+p.ph)*4, p.r, 0, Math.PI*2);
-    ctx.fill();
-  }
-  ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+  // Bottom warmth fade
+  const btmGrad = ctx.createLinearGradient(0, H*0.65, 0, H);
+  btmGrad.addColorStop(0, 'transparent');
+  btmGrad.addColorStop(1, 'rgba(12,9,6,0.6)');
+  ctx.fillStyle = btmGrad; ctx.fillRect(0, 0, W, H);
+}
 
-  const floorY = H * 0.73;
-  ctx.fillStyle = lg(0, floorY, 0, H, [[0,'#0d0a18'],[0.4,'#080612'],[1,'#030208']]);
-  ctx.fillRect(0, floorY, W, H - floorY);
+// ════════════════════════════════════════════════════════
+//  ROBOT HELPERS
+// ════════════════════════════════════════════════════════
+let robotVisorPos = { x: 0, y: 0 };
 
-  // Perspective floor grid
-  const vpX = W * 0.52;
-  const spread = W * 0.90;
-  const nLines = 22;
-  ctx.save(); ctx.globalAlpha = 0.10; ctx.strokeStyle = '#ff8822'; ctx.lineWidth = 0.6;
-  for (let i = -nLines; i <= nLines; i++) {
-    const bx = vpX + (i / nLines) * spread;
-    ctx.beginPath(); ctx.moveTo(vpX, floorY); ctx.lineTo(bx, H+10); ctx.stroke();
-  }
-  for (let row = 1; row <= 10; row++) {
-    const f = row / 10;
-    const fy = floorY + (H - floorY) * (f * f);
-    const t2 = (fy - floorY) / (H + 10 - floorY);
-    const hw = spread * t2;
-    ctx.beginPath(); ctx.moveTo(vpX-hw, fy); ctx.lineTo(vpX+hw, fy); ctx.stroke();
-  }
+function drawArmSegment(x1, y1, x2, y2, r1, r2) {
+  const dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy)||1;
+  const nx=-dy/len, ny=dx/len;
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,0.35)'; ctx.shadowBlur=8;
+  const g=ctx.createLinearGradient(x1+nx*r1,y1+ny*r1,x1-nx*r1,y1-ny*r1);
+  g.addColorStop(0,'#c8c8d2'); g.addColorStop(0.45,'#e8e8f0'); g.addColorStop(1,'#909098');
+  ctx.fillStyle=g;
+  ctx.beginPath();
+  ctx.moveTo(x1+nx*r1,y1+ny*r1);
+  ctx.lineTo(x2+nx*r2,y2+ny*r2);
+  ctx.lineTo(x2-nx*r2,y2-ny*r2);
+  ctx.lineTo(x1-nx*r1,y1-ny*r1);
+  ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.arc(x1,y1,r1,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x2,y2,r2,0,Math.PI*2); ctx.fill();
   ctx.restore();
+}
 
-  ctx.fillStyle = rg(W*.52, floorY+8, 0, W*.30, [[0,'rgba(255,130,0,0.18)'],[0.6,'rgba(255,80,0,0.04)'],[1,'transparent']]);
-  ctx.fillRect(0, floorY, W, H-floorY);
+function drawOrangeJoint(x, y, r) {
+  ctx.save();
+  ctx.shadowColor='#ff8800'; ctx.shadowBlur=10;
+  const g=ctx.createRadialGradient(x-r*.35,y-r*.35,r*.05,x,y,r);
+  g.addColorStop(0,'#ffe044'); g.addColorStop(0.5,'#ff9500'); g.addColorStop(1,'#b84400');
+  ctx.fillStyle=g;
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
 
-  ctx.save(); ctx.globalAlpha = 0.065; ctx.strokeStyle = '#aac8ff'; ctx.lineWidth = 0.55;
-  for (const r of rainDrops) {
-    r.ny += r.spd; if (r.ny > 1.08) r.ny = -0.06;
-    const rx = r.nx*W, ry = r.ny*H;
-    ctx.beginPath(); ctx.moveTo(rx,ry); ctx.lineTo(rx - r.sln*W*2, ry + r.len*H*2); ctx.stroke();
+function drawClaw(wx, wy, dir, S) {
+  const r=16*S;
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,0.4)'; ctx.shadowBlur=6;
+  ctx.strokeStyle='#b4b4be'; ctx.lineWidth=5*S; ctx.lineCap='round';
+  for (let i=0; i<2; i++) {
+    const oy=(i-0.5)*13*S, ox=dir*4*S;
+    ctx.beginPath();
+    if (dir<0) ctx.arc(wx+ox,wy+oy,r,-Math.PI*.65,Math.PI*.65);
+    else       ctx.arc(wx+ox,wy+oy,r, Math.PI*.35,Math.PI*1.65);
+    ctx.stroke();
   }
   ctx.restore();
 }
@@ -586,154 +561,150 @@ function drawBackground(t) {
 //  ROBOT
 // ════════════════════════════════════════════════════════
 function drawRobot(t) {
-  const floorY = H * 0.73;
-  const S  = H / 860;
-  const bx = W * 0.52;
-  const by = floorY;
+  const S = Math.min(W, H) / 900;
 
-  const breathe = Math.sin(t * 0.88) * 1.9 * S;
-  const visorP  = 0.68 + 0.32 * Math.sin(t * 2.4);
-  const chestP  = 0.50 + 0.50 * Math.sin(t * 1.75);
+  // Slide in from above on first entry
+  const entryProg = Math.min(1, phaseT / 1.1);
+  const entryEase = 1 - Math.pow(1 - entryProg, 3);
+  const entryOff  = (1 - entryEase) * (-H * 0.55);
+  const bob       = Math.sin(t * 1.25) * 7 * S;
 
-  // Floor shadow
-  ctx.save(); ctx.globalAlpha = 0.48;
-  ctx.fillStyle = rg(bx, by, 4, 95*S, [[0,'rgba(0,0,0,0.75)'],[1,'transparent']]);
-  ctx.beginPath(); ctx.ellipse(bx, by, 92*S, 20*S, 0, 0, Math.PI*2); ctx.fill();
-  ctx.restore();
+  const cx = W * 0.5;
+  const cy = H * 0.50 + bob + entryOff;
 
-  // Right leg
-  const rLx = bx + 28*S;
-  const legTY = by - 158*S;
-  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.85)'; ctx.shadowBlur = 10;
-  ctx.fillStyle = lg(rLx-14*S,0,rLx+14*S,0,[[0,'#707078'],[0.5,'#aaaab2'],[1,'#505058']]);
-  rr(rLx-14*S, legTY+4*S, 28*S, 62*S, 7*S); ctx.fill();
-  ctx.fillStyle = '#1c1c24'; ctx.beginPath(); ctx.arc(rLx, legTY+68*S, 9*S, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle = lg(rLx-12*S,0,rLx+12*S,0,[[0,'#191920'],[0.5,'#2a2a34'],[1,'#101018']]);
-  rr(rLx-12*S, legTY+74*S, 24*S, 46*S, 6*S); ctx.fill();
-  ctx.fillStyle = lg(rLx-17*S,0,rLx+24*S,0,[[0,'#18181e'],[0.5,'#2e2e3a'],[1,'#101018']]);
-  rr(rLx-18*S, legTY+118*S, 42*S, 46*S, 9*S); ctx.fill();
-  ctx.globalAlpha = 0.68; ctx.fillStyle = '#ff8800'; ctx.shadowColor = '#ff8800'; ctx.shadowBlur = 8;
-  ctx.fillRect(rLx-16*S, legTY+156*S, 38*S, 3.5*S);
-  ctx.restore();
+  // ── HOVER RINGS ────────────────────────────────
+  for (let i = 0; i < 3; i++) {
+    const rp = 0.5 + 0.5 * Math.sin(t * 1.9 + i * 1.1);
+    ctx.save();
+    ctx.globalAlpha = (0.38 - i*0.1) * rp;
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5*S;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy+155*S+i*14*S, (68-i*14)*S, (9-i*2)*S, 0, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.restore();
+  }
 
-  // Left leg
-  const lLx = bx - 30*S;
-  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 14;
-  ctx.fillStyle = lg(lLx-17*S,0,lLx+19*S,0,[[0,'#b0b0b8'],[0.45,'#d8d8e2'],[1,'#888890']]);
-  rr(lLx-17*S, legTY, 36*S, 66*S, 9*S); ctx.fill();
-  ctx.fillStyle = '#24242c'; ctx.beginPath(); ctx.arc(lLx, legTY+68*S, 10*S, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle = lg(lLx-14*S,0,lLx+14*S,0,[[0,'#1e1e28'],[0.5,'#363644'],[1,'#141420']]);
-  rr(lLx-14*S, legTY+74*S, 28*S, 48*S, 7*S); ctx.fill();
-  ctx.fillStyle = lg(lLx-22*S,0,lLx+28*S,0,[[0,'#20202c'],[0.4,'#38384a'],[1,'#16161e']]);
-  rr(lLx-23*S, legTY+120*S, 50*S, 48*S, 11*S); ctx.fill();
-  ctx.fillStyle = '#ff8800'; ctx.shadowColor = '#ff9900'; ctx.shadowBlur = 14;
-  ctx.fillRect(lLx-21*S, legTY+160*S, 46*S, 4.5*S);
-  ctx.restore();
+  // ── WAVING ARM (screen-left) ───────────────────
+  const waBase = { x: cx-72*S, y: cy-48*S };
+  const waA1   = -Math.PI/3 - Math.sin(t*3.2)*0.40;
+  const waA2   = waA1 + 0.9 + Math.sin(t*3.2+0.5)*0.22;
+  const waEX   = waBase.x + Math.cos(waA1)*56*S;
+  const waEY   = waBase.y + Math.sin(waA1)*56*S;
+  const waWX   = waEX + Math.cos(waA2)*50*S;
+  const waWY   = waEY + Math.sin(waA2)*50*S;
+  drawArmSegment(waBase.x,waBase.y,waEX,waEY,12*S,10*S);
+  drawArmSegment(waEX,waEY,waWX,waWY,10*S,8*S);
+  drawOrangeJoint(waWX,waWY,11*S);
+  drawClaw(waWX,waWY,-1,S);
 
-  // Torso
-  const torsoX = bx + 2*S;
-  const torsoY = by - 330*S + breathe;
-  const TW = 118*S, TH = 168*S;
-  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.85)'; ctx.shadowBlur = 22;
-  ctx.fillStyle = lg(torsoX-TW/2,0,torsoX+TW/2,0,[[0,'#a8a8b0'],[0.3,'#d5d5de'],[0.55,'#e2e2ea'],[0.8,'#c8c8d0'],[1,'#787880']]);
-  rr(torsoX-TW/2, torsoY, TW, TH, 14*S); ctx.fill();
-  ctx.globalAlpha = 0.22; ctx.strokeStyle = '#909098'; ctx.lineWidth = 1.5*S;
-  rr(torsoX-36*S, torsoY+12*S, 72*S, 62*S, 6*S); ctx.stroke();
-  ctx.globalAlpha = 0.18;
-  ctx.beginPath(); ctx.moveTo(torsoX-TW/2+12*S, torsoY+82*S); ctx.lineTo(torsoX+TW/2-12*S, torsoY+82*S); ctx.stroke();
-  ctx.restore();
+  // ── LOWER ARM (screen-right) ───────────────────
+  const laBase = { x: cx+72*S, y: cy-45*S };
+  const laA1   = Math.PI/5 + Math.sin(t*0.9)*0.06;
+  const laA2   = laA1 + 0.6;
+  const laEX   = laBase.x + Math.cos(laA1)*52*S;
+  const laEY   = laBase.y + Math.sin(laA1)*52*S;
+  const laWX   = laEX + Math.cos(laA2)*46*S;
+  const laWY   = laEY + Math.sin(laA2)*46*S;
+  drawArmSegment(laBase.x,laBase.y,laEX,laEY,12*S,10*S);
+  drawArmSegment(laEX,laEY,laWX,laWY,10*S,8*S);
+  drawOrangeJoint(laWX,laWY,11*S);
+  drawClaw(laWX,laWY,1,S);
 
+  // ── TORSO ──────────────────────────────────────
+  const tW=118*S, tH=130*S, tX=cx-tW/2, tY=cy-68*S;
   ctx.save();
-  ctx.fillStyle = rg(torsoX, torsoY+34*S, 0, 20*S, [[0,`rgba(255,170,30,${0.85+chestP*.15})`],[0.4,`rgba(255,100,10,${0.35+chestP*.25})`],[1,'transparent']]);
-  ctx.shadowColor = '#ff9900'; ctx.shadowBlur = 28 + chestP*22;
-  ctx.beginPath(); ctx.arc(torsoX, torsoY+34*S, 10*S, 0, Math.PI*2); ctx.fill();
+  ctx.shadowColor='rgba(0,0,0,0.55)'; ctx.shadowBlur=22;
+  const tg=ctx.createLinearGradient(tX,tY,tX+tW,tY+tH);
+  tg.addColorStop(0,'#f2f2f4'); tg.addColorStop(0.4,'#e6e6ea'); tg.addColorStop(1,'#c4c4cc');
+  ctx.fillStyle=tg; rr(tX,tY,tW,tH,18*S); ctx.fill();
   ctx.restore();
 
-  ctx.save(); ctx.fillStyle = '#ff8800'; ctx.shadowColor = '#ff9900'; ctx.shadowBlur = 16 + visorP*12;
-  ctx.fillRect(torsoX-46*S, torsoY+TH-8*S, 92*S, 5*S);
-  ctx.restore();
-
-  // Shoulders
-  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.7)'; ctx.shadowBlur = 12;
-  ctx.fillStyle = lg(torsoX-TW/2-14*S,0,torsoX-TW/2+28*S,0,[[0,'#c8c8d0'],[0.5,'#e6e6ee'],[1,'#b0b0b8']]);
-  rr(torsoX-TW/2-14*S, torsoY-5*S, 40*S, 27*S, 11*S); ctx.fill(); ctx.restore();
-  ctx.save(); ctx.globalAlpha = 0.80; ctx.shadowBlur = 7;
-  ctx.fillStyle = lg(torsoX+TW/2-18*S,0,torsoX+TW/2+18*S,0,[[0,'#888890'],[0.5,'#b0b0b8'],[1,'#686870']]);
-  rr(torsoX+TW/2-18*S, torsoY-3*S, 35*S, 24*S, 10*S); ctx.fill(); ctx.restore();
-
-  // Arms
-  const rAx = torsoX + 67*S, armTY = torsoY + 14*S;
-  ctx.save(); ctx.globalAlpha = 0.76; ctx.shadowBlur = 7;
-  ctx.fillStyle = lg(rAx-12*S,0,rAx+12*S,0,[[0,'#6e6e76'],[0.5,'#9e9ea6'],[1,'#525258']]);
-  rr(rAx-12*S, armTY, 24*S, 72*S, 10*S); ctx.fill();
-  ctx.fillStyle = lg(rAx-11*S,0,rAx+11*S,0,[[0,'#141420'],[0.5,'#222230'],[1,'#0e0e1a']]);
-  rr(rAx-11*S, armTY+74*S, 22*S, 54*S, 7*S); ctx.fill();
-  ctx.fillStyle = '#1a1a26'; ctx.beginPath(); ctx.arc(rAx, armTY+138*S, 13*S, 0, Math.PI*2); ctx.fill();
-  ctx.restore();
-
-  const lAx = torsoX - 68*S;
-  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.75)'; ctx.shadowBlur = 12;
-  ctx.fillStyle = lg(lAx-16*S,0,lAx+16*S,0,[[0,'#adadb5'],[0.45,'#d5d5de'],[1,'#7c7c84']]);
-  rr(lAx-15*S, armTY, 30*S, 75*S, 10*S); ctx.fill();
-  ctx.fillStyle = lg(lAx-13*S,0,lAx+13*S,0,[[0,'#1c1c28'],[0.5,'#303042'],[1,'#121220']]);
-  rr(lAx-13*S, armTY+77*S, 26*S, 57*S, 8*S); ctx.fill();
-  ctx.fillStyle = '#222232'; ctx.beginPath(); ctx.arc(lAx, armTY+145*S, 15*S, 0, Math.PI*2); ctx.fill();
-  ctx.restore();
-
-  // Head
-  const hcx = bx + 6*S, hcy = by - 490*S + breathe, HR = 82*S;
-  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 8;
-  ctx.fillStyle = lg(hcx-13*S,0,hcx+13*S,0,[[0,'#18181e'],[0.5,'#2c2c36'],[1,'#10101a']]);
-  rr(hcx-12*S, hcy+HR-4*S, 24*S, 34*S, 5*S); ctx.fill(); ctx.restore();
-
-  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 30;
-  ctx.fillStyle = rg(hcx-HR*.38, hcy-HR*.32, HR*.04, HR*1.12, [[0,'#ebebf3'],[0.35,'#d2d2da'],[0.70,'#a8a8b0'],[1,'#6a6a72']]);
-  ctx.beginPath(); ctx.arc(hcx, hcy, HR, 0, Math.PI*2); ctx.fill();
-  ctx.globalAlpha = 0.12; ctx.strokeStyle = '#5a5a64'; ctx.lineWidth = 1.5*S;
-  ctx.beginPath(); ctx.arc(hcx+4*S, hcy, HR*.82, Math.PI*.05, Math.PI*.95); ctx.stroke();
-  ctx.restore();
-
-  // Visor
-  const visorY = hcy + 4*S, visorRx = HR*.90, visorRy = HR*.24;
-  ctx.save(); ctx.fillStyle = '#040206'; ctx.shadowBlur = 0;
-  ctx.beginPath(); ctx.ellipse(hcx, visorY, visorRx+1*S, visorRy+1*S, 0, 0, Math.PI*2); ctx.fill(); ctx.restore();
-
+  // Chest panel
   ctx.save();
-  const vg = ctx.createLinearGradient(hcx-visorRx, visorY, hcx+visorRx, visorY);
-  vg.addColorStop(0,    `rgba(180,60,0,${0.22*visorP})`);
-  vg.addColorStop(0.15, `rgba(255,130,15,${0.82*visorP})`);
-  vg.addColorStop(0.32, `rgba(255,195,50,${visorP})`);
-  vg.addColorStop(0.50, `rgba(255,215,70,${visorP})`);
-  vg.addColorStop(0.68, `rgba(255,195,50,${visorP})`);
-  vg.addColorStop(0.85, `rgba(255,130,15,${0.82*visorP})`);
-  vg.addColorStop(1,    `rgba(180,60,0,${0.22*visorP})`);
-  ctx.fillStyle = vg; ctx.shadowColor = '#ff9900'; ctx.shadowBlur = 36 + visorP*28;
-  ctx.beginPath(); ctx.ellipse(hcx, visorY, visorRx*.92, visorRy*.85, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#8a8a96'; ctx.shadowColor='rgba(0,0,0,0.35)'; ctx.shadowBlur=6;
+  rr(cx-30*S,tY+38*S,60*S,20*S,5*S); ctx.fill();
   ctx.restore();
 
+  // Waist ring
   ctx.save();
-  ctx.strokeStyle = `rgba(255,165,45,${0.5+visorP*.5})`; ctx.lineWidth = 2.5*S;
-  ctx.shadowColor = '#ff9900'; ctx.shadowBlur = 20;
-  ctx.beginPath(); ctx.ellipse(hcx, visorY, visorRx, visorRy, 0, 0, Math.PI*2); ctx.stroke();
+  const wring=ctx.createLinearGradient(cx-26*S,0,cx+26*S,0);
+  wring.addColorStop(0,'#8888a0'); wring.addColorStop(0.5,'#aaaabf'); wring.addColorStop(1,'#707088');
+  ctx.fillStyle=wring; ctx.shadowColor='rgba(0,0,0,0.4)'; ctx.shadowBlur=8;
+  rr(cx-26*S,tY+tH-14*S,52*S,28*S,10*S); ctx.fill();
   ctx.restore();
 
-  ctx.save(); ctx.globalAlpha = 0.22; ctx.fillStyle = 'rgba(255,250,220,0.7)';
-  ctx.beginPath(); ctx.ellipse(hcx-visorRx*.22, visorY-visorRy*.42, visorRx*.28, visorRy*.22, -0.18, 0, Math.PI*2); ctx.fill();
+  // ── SHOULDER JOINTS ────────────────────────────
+  drawOrangeJoint(cx-62*S, cy-55*S, 15*S);
+  drawOrangeJoint(cx+62*S, cy-55*S, 15*S);
+
+  // ── NECK ───────────────────────────────────────
+  ctx.save();
+  ctx.fillStyle='#c8c8d4'; ctx.shadowColor='rgba(0,0,0,0.3)'; ctx.shadowBlur=6;
+  rr(cx-11*S,cy-82*S,22*S,22*S,5*S); ctx.fill();
   ctx.restore();
 
-  ctx.save(); ctx.globalAlpha = 0.09 + visorP*.05;
-  ctx.fillStyle = rg(hcx, visorY, 4, HR*1.1, [[0,'rgba(255,145,20,0.55)'],[0.4,'rgba(255,80,10,0.12)'],[1,'transparent']]);
-  ctx.beginPath(); ctx.arc(hcx, hcy, HR, 0, Math.PI*2); ctx.fill(); ctx.restore();
-
-  ctx.save(); ctx.fillStyle = '#1e1e28'; ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 10;
-  ctx.beginPath(); ctx.arc(hcx-HR*.97, hcy, 12*S, 0, Math.PI*2); ctx.fill();
-  ctx.globalAlpha = 0.72; ctx.beginPath(); ctx.arc(hcx+HR*.97, hcy, 11*S, 0, Math.PI*2); ctx.fill();
+  // ── HEAD ───────────────────────────────────────
+  const hW=162*S, hH=98*S, hX=cx-hW/2, hY=cy-168*S;
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,0.6)'; ctx.shadowBlur=28;
+  const hg=ctx.createLinearGradient(hX,hY,hX+hW,hY+hH);
+  hg.addColorStop(0,'#f6f6f8'); hg.addColorStop(0.5,'#eaeaed'); hg.addColorStop(1,'#ccccD2');
+  ctx.fillStyle=hg; rr(hX,hY,hW,hH,34*S); ctx.fill();
   ctx.restore();
 
-  ctx.save(); ctx.globalAlpha = 0.065;
-  ctx.fillStyle = rg(torsoX+90*S, torsoY+45*S, 10, 240*S, [[0,'rgba(255,140,30,0.5)'],[0.6,'rgba(200,80,10,0.1)'],[1,'transparent']]);
-  ctx.fillRect(torsoX-220*S, torsoY-220*S, 520*S, 620*S);
+  // Head top shine
+  ctx.save(); ctx.globalAlpha=0.18;
+  const hs=ctx.createLinearGradient(hX,hY,hX,hY+hH*0.55);
+  hs.addColorStop(0,'rgba(255,255,255,0.9)'); hs.addColorStop(1,'transparent');
+  ctx.fillStyle=hs; rr(hX+6*S,hY+5*S,hW-12*S,hH*0.48,28*S); ctx.fill();
   ctx.restore();
+
+  // ── ANTENNA ────────────────────────────────────
+  ctx.save();
+  ctx.strokeStyle='#d8d8e0'; ctx.lineWidth=4*S; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(cx,hY); ctx.lineTo(cx,hY-28*S); ctx.stroke();
+  ctx.restore();
+  drawOrangeJoint(cx, hY-28*S, 13*S);
+
+  // ── EAR KNOBS ──────────────────────────────────
+  drawOrangeJoint(hX-5*S, hY+hH*0.5, 11*S);
+  drawOrangeJoint(hX+hW+5*S, hY+hH*0.5, 11*S);
+
+  // ── VISOR ──────────────────────────────────────
+  const vW=128*S, vH=52*S, vX=cx-vW/2, vY=hY+hH*0.28;
+  ctx.save();
+  ctx.fillStyle='#06080c'; ctx.shadowColor='rgba(0,0,0,0.8)'; ctx.shadowBlur=4;
+  rr(vX,vY,vW,vH,12*S); ctx.fill();
+  ctx.restore();
+
+  // Eyes (two glowing rounded rects)
+  const eyeGlow = 0.82 + 0.18*Math.sin(t*2.2);
+  const eW=vW*0.19, eH=vH*0.33, eY=vY+vH*0.18;
+  const eg=ctx.createLinearGradient(0,eY,0,eY+eH);
+  eg.addColorStop(0,'#ffffff'); eg.addColorStop(1,`rgba(255,215,80,${eyeGlow})`);
+  ctx.save(); ctx.shadowColor='rgba(255,228,100,0.9)'; ctx.shadowBlur=14; ctx.fillStyle=eg;
+  rr(cx-vW*0.30-eW/2, eY, eW, eH, 3*S); ctx.fill(); ctx.restore();
+  ctx.save(); ctx.shadowColor='rgba(255,228,100,0.9)'; ctx.shadowBlur=14; ctx.fillStyle=eg;
+  rr(cx+vW*0.12, eY, eW, eH, 3*S); ctx.fill(); ctx.restore();
+
+  // Smile arc
+  ctx.save();
+  ctx.strokeStyle=`rgba(255,220,85,${eyeGlow*0.88})`;
+  ctx.shadowColor='rgba(255,200,80,0.7)'; ctx.shadowBlur=8;
+  ctx.lineWidth=2.5*S; ctx.lineCap='round';
+  ctx.beginPath(); ctx.arc(cx, vY+vH*0.72-5*S, vW*0.195, 0.08, Math.PI-0.08); ctx.stroke();
+  ctx.restore();
+
+  // Visor specular highlight
+  ctx.save(); ctx.globalAlpha=0.13;
+  const vh=ctx.createLinearGradient(vX,vY,vX,vY+vH*0.4);
+  vh.addColorStop(0,'rgba(255,255,255,0.9)'); vh.addColorStop(1,'transparent');
+  ctx.fillStyle=vh; rr(vX+3*S,vY+3*S,vW-6*S,vH*0.38,9*S); ctx.fill();
+  ctx.restore();
+
+  // Record visor center for zoom-in transition
+  robotVisorPos.x = cx;
+  robotVisorPos.y = vY + vH*0.5;
 }
 
 // ════════════════════════════════════════════════════════
@@ -1078,22 +1049,25 @@ function loop(now) {
     }
   }
 
-  // ── SPIN TRANSITION ──────────────────────────
+  // ── ZOOM INTO VISOR ──────────────────────────
   if (phase === 'spin') {
-    const prog = Math.min(1, phaseT/2.0);
-    const angle = prog * Math.PI * 2;
-    const sc    = 1 - prog * 0.9;
+    const prog = Math.min(1, phaseT / 1.6);
+    // ease-in-out quad
+    const ease = prog < 0.5 ? 2*prog*prog : 1 - Math.pow(-2*prog+2, 2)/2;
+    const scale = 1 + ease * 14;
+    const px = robotVisorPos.x || W*0.5;
+    const py = robotVisorPos.y || H*0.42;
     ctx.clearRect(0,0,W,H);
     ctx.save();
-    const pivotX = W*0.52, pivotY = H*0.47;
-    ctx.translate(pivotX, pivotY);
-    ctx.rotate(angle); ctx.scale(sc, sc);
-    ctx.translate(-pivotX, -pivotY);
+    ctx.translate(px, py);
+    ctx.scale(scale, scale);
+    ctx.translate(-px, -py);
     drawBackground(T); drawRobot(T);
     ctx.restore();
-    if (prog > 0.45) {
-      const bk = (prog-0.45)/0.55;
-      ctx.fillStyle = `rgba(0,0,0,${bk*bk})`; ctx.fillRect(0,0,W,H);
+    // Flash blue-white as we punch through the visor
+    if (ease > 0.52) {
+      const fl = (ease-0.52)/0.48;
+      ctx.fillStyle=`rgba(210,230,255,${fl*fl*0.92})`; ctx.fillRect(0,0,W,H);
     }
     if (prog >= 1) {
       ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
