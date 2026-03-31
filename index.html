@@ -137,11 +137,17 @@
     .timeline { display: flex; flex-direction: column; }
     .tl-item {
       padding: 20px 0 20px 28px; border-left: 1px solid var(--border); position: relative;
+      transition: transform .25s cubic-bezier(.34,1.56,.64,1); cursor: default;
     }
+    .tl-item:hover { transform: translateX(5px); }
     .tl-item::before {
       content: ''; position: absolute; left: -4px; top: 27px;
       width: 7px; height: 7px; background: var(--accent); border-radius: 50%;
-      box-shadow: 0 0 0 3px rgba(90,122,92,.15);
+      animation: pulse-tl-dot 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse-tl-dot {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(90,122,92,.15); }
+      50%       { box-shadow: 0 0 0 5px rgba(90,122,92,.32), 0 0 10px 3px rgba(90,122,92,.13); }
     }
     .tl-item:last-child { padding-bottom: 4px; }
     .tl-meta { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; flex-wrap: wrap; }
@@ -150,21 +156,22 @@
     .tl-company { font-size: 12.5px; color: var(--accent); margin-bottom: 7px; }
     .tl-desc { font-size: 13.5px; color: var(--muted); line-height: 1.72; }
 
-    /* ── PROJECT BUBBLES ── */
-    .bubbles-wrap { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
-    .proj-bubble {
-      display: inline-flex; align-items: center; gap: 10px;
-      padding: 10px 20px; background: var(--card); border: 1px solid var(--border);
-      border-radius: 999px; color: var(--text); text-decoration: none; font-size: 13px;
-      transition: transform .2s cubic-bezier(.34,1.56,.64,1), border-color .2s, box-shadow .2s;
+    /* ── PROJECT CARDS ── */
+    .cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .proj-card {
+      display: flex; flex-direction: column; gap: 10px;
+      padding: 18px 20px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; color: var(--text); text-decoration: none;
+      transition: transform .22s cubic-bezier(.34,1.56,.64,1), border-color .2s, box-shadow .2s;
     }
-    .proj-bubble:hover {
-      transform: scale(1.06);
-      border-color: rgba(90,122,92,.55);
-      box-shadow: 0 0 0 1px rgba(90,122,92,.12), 0 8px 24px rgba(0,0,0,.45);
+    .proj-card:hover {
+      transform: translateY(-4px) scale(1.02);
+      border-color: rgba(90,122,92,.5);
+      box-shadow: 0 10px 28px rgba(0,0,0,.5), 0 0 0 1px rgba(90,122,92,.1);
     }
-    .proj-bubble--lg { padding: 12px 26px; font-size: 14px; font-weight: 500; }
-    .bubble-icon { font-size: 16px; line-height: 1; }
+    .proj-card-header { display: flex; align-items: center; justify-content: space-between; }
+    .proj-card-name { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .bubble-icon { font-size: 15px; line-height: 1; }
     .bubble-tag {
       font-family: var(--mono); font-size: 10px; color: var(--muted);
       padding: 2px 8px; background: rgba(255,255,255,.04);
@@ -180,6 +187,22 @@
     .post-row a:hover { color: var(--accent); }
     .post-dots { flex: 1; border-bottom: 1px dotted var(--border); margin-bottom: 3px; min-width: 16px; }
     .post-date { font-family: var(--mono); font-size: 10.5px; color: var(--muted); white-space: nowrap; }
+
+    /* ── BLOG TAB OVERLAY ── */
+    #writing { display: none; }
+    #blog-overlay {
+      display: none; position: fixed; inset: 0; z-index: 100;
+      background: rgba(26,21,16,.96); backdrop-filter: blur(10px);
+      overflow-y: auto; padding: 60px 24px 80px;
+    }
+    #blog-overlay.open { display: block; }
+    .blog-close {
+      position: fixed; top: 22px; right: 28px;
+      background: none; border: none; color: var(--muted); cursor: pointer;
+      font-size: 22px; line-height: 1; transition: color .18s; z-index: 101;
+    }
+    .blog-close:hover { color: var(--text); }
+    .blog-inner { max-width: 720px; margin: 0 auto; }
 
     /* ── STACK ── */
     .stack-grid { display: flex; flex-direction: column; gap: 20px; }
@@ -234,7 +257,7 @@
     <ul>
       <li><a href="#experience">Work</a></li>
       <li><a href="#projects">Projects</a></li>
-      <li><a href="#writing">Blog</a></li>
+      <li><a href="#" id="blog-tab-btn">Blog</a></li>
       <li><a href="#about">About</a></li>
     </ul>
     <div class="nav-icons">
@@ -304,55 +327,47 @@
         <div class="sec-line"></div>
         <a href="#" class="sec-more">see all →</a>
       </div>
-      <div class="bubbles-wrap">
-        <a class="proj-bubble proj-bubble--lg" href="#">
-          <span class="bubble-icon">⌨</span>
-          <span>DevKit CLI</span>
-          <span class="bubble-tag">TypeScript</span>
+      <div class="cards-grid">
+        <a class="proj-card" href="#">
+          <div class="proj-card-header">
+            <span class="proj-card-name"><span class="bubble-icon">⌨</span>DevKit CLI</span>
+            <span class="bubble-tag">TypeScript</span>
+          </div>
         </a>
-        <a class="proj-bubble proj-bubble--lg" href="#">
-          <span class="bubble-icon">◈</span>
-          <span>Meshflow</span>
-          <span class="bubble-tag">React</span>
+        <a class="proj-card" href="#">
+          <div class="proj-card-header">
+            <span class="proj-card-name"><span class="bubble-icon">◈</span>Meshflow</span>
+            <span class="bubble-tag">React</span>
+          </div>
         </a>
-        <a class="proj-bubble" href="#">
-          <span class="bubble-icon">⬡</span>
-          <span>Snapschema</span>
-          <span class="bubble-tag">Validation</span>
+        <a class="proj-card" href="#">
+          <div class="proj-card-header">
+            <span class="proj-card-name"><span class="bubble-icon">⬡</span>Snapschema</span>
+            <span class="bubble-tag">Validation</span>
+          </div>
         </a>
-        <a class="proj-bubble" href="#">
-          <span class="bubble-icon">✦</span>
-          <span>Patchwork</span>
-          <span class="bubble-tag">CSS-in-JS</span>
+        <a class="proj-card" href="#">
+          <div class="proj-card-header">
+            <span class="proj-card-name"><span class="bubble-icon">✦</span>Patchwork</span>
+            <span class="bubble-tag">CSS-in-JS</span>
+          </div>
         </a>
-        <a class="proj-bubble" href="#">
-          <span class="bubble-icon">⟁</span>
-          <span>Kestrel</span>
-          <span class="bubble-tag">Go</span>
+        <a class="proj-card" href="#">
+          <div class="proj-card-header">
+            <span class="proj-card-name"><span class="bubble-icon">⟁</span>Kestrel</span>
+            <span class="bubble-tag">Go</span>
+          </div>
         </a>
-        <a class="proj-bubble" href="#">
-          <span class="bubble-icon">▦</span>
-          <span>Logdeck</span>
-          <span class="bubble-tag">Node.js</span>
+        <a class="proj-card" href="#">
+          <div class="proj-card-header">
+            <span class="proj-card-name"><span class="bubble-icon">▦</span>Logdeck</span>
+            <span class="bubble-tag">Node.js</span>
+          </div>
         </a>
       </div>
     </section>
 
-    <!-- BLOG -->
-    <section id="writing" class="reveal-item">
-      <div class="sec-head">
-        <h2>Writing</h2>
-        <div class="sec-line"></div>
-        <a href="#" class="sec-more">all posts →</a>
-      </div>
-      <ul class="post-list">
-        <li class="post-row"><a href="#">Why I'm betting on the Edge Runtime in 2025</a><span class="post-dots"></span><span class="post-date">Mar 2025</span></li>
-        <li class="post-row"><a href="#">The hidden cost of deep TypeScript generics</a><span class="post-dots"></span><span class="post-date">Feb 2025</span></li>
-        <li class="post-row"><a href="#">Building a bundler from scratch: what I learned</a><span class="post-dots"></span><span class="post-date">Jan 2025</span></li>
-        <li class="post-row"><a href="#">Rethinking monorepo tooling for 2025</a><span class="post-dots"></span><span class="post-date">Dec 2024</span></li>
-        <li class="post-row"><a href="#">Effective patterns for async state in React</a><span class="post-dots"></span><span class="post-date">Nov 2024</span></li>
-      </ul>
-    </section>
+    <!-- BLOG section moved to overlay -->
 
     <!-- STACK -->
     <section id="skills" class="reveal-item">
@@ -447,6 +462,25 @@
   </footer>
 </div>
 
+<!-- ── BLOG OVERLAY ── -->
+<div id="blog-overlay">
+  <button class="blog-close" id="blog-close-btn" aria-label="Close blog">&#x2715;</button>
+  <div class="blog-inner">
+    <div class="sec-head" style="margin-bottom:28px">
+      <h2>Writing</h2>
+      <div class="sec-line"></div>
+      <a href="#" class="sec-more">all posts →</a>
+    </div>
+    <ul class="post-list">
+      <li class="post-row"><a href="#">Why I'm betting on the Edge Runtime in 2025</a><span class="post-dots"></span><span class="post-date">Mar 2025</span></li>
+      <li class="post-row"><a href="#">The hidden cost of deep TypeScript generics</a><span class="post-dots"></span><span class="post-date">Feb 2025</span></li>
+      <li class="post-row"><a href="#">Building a bundler from scratch: what I learned</a><span class="post-dots"></span><span class="post-date">Jan 2025</span></li>
+      <li class="post-row"><a href="#">Rethinking monorepo tooling for 2025</a><span class="post-dots"></span><span class="post-date">Dec 2024</span></li>
+      <li class="post-row"><a href="#">Effective patterns for async state in React</a><span class="post-dots"></span><span class="post-date">Nov 2024</span></li>
+    </ul>
+  </div>
+</div>
+
 <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.73/build/spline-viewer.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
@@ -466,8 +500,8 @@ function resize() { W = cv.width = window.innerWidth; H = cv.height = window.inn
 resize();
 window.addEventListener('resize', resize);
 
-// Phases: 'robot' → (click) → 'spin' → 'black' → 'cloud' → 'reform' → 'done'
-let phase  = 'robot';
+// Phases: 'cloud' → (click) → 'scan' → 'done'
+let phase  = 'cloud';
 let T      = 0;
 let prevNow = null;
 let phaseT = 0;
@@ -494,10 +528,7 @@ function drawBackground(t) {
   ctx.fillRect(0, 0, W, H);
 }
 
-// ════════════════════════════════════════════════════════
-//  CANVAS ROBOT  (simulates the Spline humanoid figure)
-// ════════════════════════════════════════════════════════
-let robotVisorPos = { x: 0, y: 0 };
+// (robot scene removed)
 
 function drawRobot(t) {
   const cx = W * 0.5;
@@ -719,10 +750,6 @@ function drawRobot(t) {
   ctx.restore();
 
   ctx.restore(); // end robot transform
-
-  // Record visor centre for spin-zoom
-  robotVisorPos.x = cx;
-  robotVisorPos.y = cy + bob - S(111);
 }
 
 // ════════════════════════════════════════════════════════
@@ -781,7 +808,7 @@ function initThreeDotted() {
   const AMOUNTY    = 60;
 
   const scene = new THREE.Scene();
-  scene.fog   = new THREE.FogExp2(0x000000, 0.000095);
+  scene.fog   = new THREE.FogExp2(0x000000, 0.00032);
 
   const camera = new THREE.PerspectiveCamera(60, W / H, 1, 10000);
   camera.position.set(0, 355, 1220);
@@ -987,7 +1014,7 @@ function drawScanReveal(progress) {
   // ── 1. Glow: draw only dots whose depth falls within the ±BAND slice ──
   // mask = dot × flow × vec3(10,0,0)  →  alpha = min(1, brightness × flow × 10)
   glowCtx.clearRect(0, 0, W, H);
-  glowCtx.fillStyle = '#ff1000';     // pure red (G=0, B=0) matches vec3(10,0,0)
+  glowCtx.fillStyle = '#ffffff';     // pure white matches vec3(10,10,10)
 
   for (const dot of dots) {
     if (dot.depth < lo) continue;
@@ -1055,80 +1082,12 @@ function drawScanReveal(progress) {
   const beamH = Math.max(4, H * 0.05 * 0.5); // scanWidth=0.05 → half in each direction
   const beamG = ctx.createLinearGradient(0, scanY - beamH, 0, scanY + beamH);
   beamG.addColorStop(0,    'transparent');
-  beamG.addColorStop(0.35, `rgba(255, 10, 0, ${0.45 * pulse})`);
-  beamG.addColorStop(0.50, `rgba(255, 60, 0, ${0.95 * pulse})`);  // hot core
-  beamG.addColorStop(0.65, `rgba(255, 10, 0, ${0.45 * pulse})`);
+  beamG.addColorStop(0.35, `rgba(255, 255, 255, ${0.45 * pulse})`);
+  beamG.addColorStop(0.50, `rgba(255, 255, 255, ${0.95 * pulse})`);  // hot core
+  beamG.addColorStop(0.65, `rgba(255, 255, 255, ${0.45 * pulse})`);
   beamG.addColorStop(1,    'transparent');
   ctx.fillStyle = beamG;
   ctx.fillRect(0, scanY - beamH, W, beamH * 2);
-}
-
-// ════════════════════════════════════════════════════════
-//  POINT CLOUD
-// ════════════════════════════════════════════════════════
-const CLOUD_N = 7500;
-const cloud = [];
-
-function initCloud() {
-  cloud.length = 0;
-  for (let i = 0; i < CLOUD_N; i++) {
-    const z  = 1 + Math.random() * 7;
-    const nx = (Math.random() - 0.5) * 2.4;
-    const ny = (Math.random() - 0.7) * 2.0;
-    let col;
-    if      (z < 2.5) col = `hsl(${170+nx*20},100%,${52+Math.random()*18}%)`;
-    else if (z < 5.0) col = `hsl(${95+ny*15},100%,${48+Math.random()*20}%)`;
-    else              col = `hsl(${305+nx*25},100%,${50+Math.random()*20}%)`;
-    cloud.push({ ox:nx, oy:ny, z, x:nx, y:ny, col, tx:nx, ty:ny,
-      vx:(Math.random()-.5)*.008, vy:(Math.random()-.5)*.006,
-      sr:0.4+Math.random()*.8, speed:0.04+Math.random()*.06 });
-  }
-}
-
-function buildReformTargets() {
-  const regions = [
-    { nx:0,    ny:-0.88, sx:2.2,  sy:0.06, weight:0.06 },
-    { nx:-0.5, ny:-0.58, sx:0.9,  sy:0.18, weight:0.12 },
-    { nx:-0.5, ny:-0.32, sx:0.85, sy:0.16, weight:0.08 },
-    { nx:0.52, ny:-0.52, sx:0.28, sy:0.32, weight:0.06 },
-    { nx:-0.55,ny:0.10,  sx:0.28, sy:0.30, weight:0.12 },
-    { nx:0.02, ny:0.10,  sx:0.28, sy:0.30, weight:0.12 },
-    { nx:0.58, ny:0.10,  sx:0.28, sy:0.30, weight:0.12 },
-    { nx:-0.1, ny:0.55,  sx:1.1,  sy:0.28, weight:0.10 },
-    { nx:-0.1, ny:0.82,  sx:1.0,  sy:0.22, weight:0.08 },
-    { nx:0,    ny:0.96,  sx:2.0,  sy:0.04, weight:0.04 },
-  ];
-  const total = regions.reduce((s,r) => s+r.weight, 0);
-  const cumW = []; let cum = 0;
-  for (const r of regions) { cum += r.weight/total; cumW.push(cum); }
-  for (const p of cloud) {
-    const rv = Math.random(); let ri = 0;
-    for (let k = 0; k < cumW.length; k++) { if (rv < cumW[k]) { ri=k; break; } }
-    const reg = regions[ri];
-    p.tx = reg.nx + (Math.random()-.5)*reg.sx;
-    p.ty = reg.ny + (Math.random()-.5)*reg.sy;
-  }
-}
-
-function drawCloud(t, reformProgress) {
-  const CX = W/2, CY = H/2, FOV = H*.65;
-  for (const p of cloud) {
-    if (reformProgress > 0) {
-      const sp = p.speed * reformProgress;
-      p.x += (p.tx-p.x)*sp; p.y += (p.ty-p.y)*sp;
-    } else {
-      p.x += p.vx; p.y += p.vy;
-      if (Math.abs(p.x)>1.4) p.vx*=-1;
-      if (Math.abs(p.y)>1.1) p.vy*=-1;
-    }
-    const z=p.z, sx=CX+p.x*FOV/z, sy=CY+p.y*FOV/z;
-    const rad=(p.sr*1.1)/(z*.6);
-    if (sx<-2||sx>W+2||sy<-2||sy>H+2) continue;
-    ctx.globalAlpha = Math.min(1,(0.55+0.45*(1-z/8)));
-    ctx.fillStyle = p.col; ctx.shadowColor = p.col; ctx.shadowBlur = z<3?3:1;
-    ctx.beginPath(); ctx.arc(sx, sy, Math.max(0.4,rad), 0, Math.PI*2); ctx.fill();
-  }
-  ctx.globalAlpha = 1; ctx.shadowBlur = 0;
 }
 
 // ════════════════════════════════════════════════════════
@@ -1163,23 +1122,20 @@ function revealPortfolio() {
 // ════════════════════════════════════════════════════════
 //  MAIN LOOP
 // ════════════════════════════════════════════════════════
-let spinStart=0, blackStart=0, cloudStart=0, reformStart=0;
-
 function loop(now) {
   if (!prevNow) prevNow = now;
   const dt = Math.min((now-prevNow)/1000, 0.05);
   prevNow = now; T += dt; phaseT += dt;
 
-  // ── ROBOT (waits for click) ───────────────────
-  if (phase === 'robot') {
+  // ── MOVING DOT BACKGROUND (waits for click) ───────────────────
+  if (phase === 'cloud') {
     ctx.clearRect(0,0,W,H);
-    drawBackground(T);
-    drawRobot(T);
-    drawHaze(T);
+    renderThreeDotted();
+    threeBg.style.opacity = Math.min(1, phaseT / 0.8);
 
-    // "click to enter" — fades in after 2.5s, pulses
-    if (phaseT > 2.5) {
-      const alpha = Math.min(1, (phaseT-2.5)/0.8);
+    // "click to enter" — fades in after 1.5s, pulses
+    if (phaseT > 1.5) {
+      const alpha = Math.min(1, (phaseT-1.5)/0.8);
       const pulse = 0.65 + 0.35 * Math.sin(T * 1.8);
       const fs = Math.round(11 * (H/800));
       ctx.save();
@@ -1191,48 +1147,6 @@ function loop(now) {
       ctx.shadowBlur  = 12;
       ctx.fillText('[ click to enter ]', W/2, H*0.88);
       ctx.restore();
-    }
-  }
-
-  // ── ZOOM IN (toward robot visor) ─────────────
-  if (phase === 'spin') {
-    const prog = Math.min(1, phaseT / 1.6);
-    const ease = prog < 0.5 ? 2*prog*prog : 1 - Math.pow(-2*prog+2, 2)/2;
-    const scale = 1 + ease * 14;
-    const px = robotVisorPos.x || W*0.5;
-    const py = robotVisorPos.y || H*0.42;
-    ctx.clearRect(0,0,W,H);
-    ctx.save();
-    ctx.translate(px, py); ctx.scale(scale, scale); ctx.translate(-px, -py);
-    drawBackground(T);
-    drawRobot(T);
-    drawHaze(T);
-    ctx.restore();
-    // Flash cyan-white as we punch through the visor
-    if (ease > 0.52) {
-      const fl = (ease-0.52)/0.48;
-      ctx.fillStyle=`rgba(210,240,255,${fl*fl*0.96})`; ctx.fillRect(0,0,W,H);
-    }
-    if (prog >= 1) {
-      ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
-      phase='black'; blackStart=T; phaseT=0;
-    }
-  }
-
-  // ── BLACK HOLD ────────────────────────────────
-  if (phase === 'black') {
-    ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
-    if (phaseT > 0.55) { initThreeDotted(); phase='cloud'; cloudStart=T; phaseT=0; }
-  }
-
-  // ── POINT CLOUD ───────────────────────────────
-  if (phase === 'cloud') {
-    ctx.clearRect(0,0,W,H);
-    renderThreeDotted();
-    threeBg.style.opacity = Math.min(1, phaseT / 0.8);
-    if (phaseT > 3.2) {
-      initScan();
-      phase='scan'; phaseT=0;
     }
   }
 
@@ -1251,18 +1165,17 @@ function loop(now) {
   if (phase !== 'done') requestAnimationFrame(loop);
 }
 
-// ── CANVAS CLICK → advance from robot phase ──
+// ── CANVAS CLICK → trigger scan from cloud phase ──
 cv.addEventListener('click', () => {
-  if (phase === 'robot') {
-    splineWrap.style.opacity = '0';
-    phase='spin'; spinStart=T; phaseT=0;
+  if (phase === 'cloud') {
+    phase='scan'; phaseT=0;
+    initScan();
   }
 });
 
 // ── SKIP (button + keyboard) ──────────────────
 function doSkip() {
   if (phase === 'done') return;
-  splineWrap.style.opacity = '0';
   disposeThreeDotted();
   disposeScan();
   document.body.style.overflow = 'auto';
@@ -1272,7 +1185,29 @@ function doSkip() {
 skipBtn.addEventListener('click', doSkip);
 document.addEventListener('keydown', e => { if (e.key==='Escape'||e.key===' ') doSkip(); });
 
+initThreeDotted();
 requestAnimationFrame(loop);
+
+// ── BLOG TAB ──────────────────────────────────
+const blogOverlay  = document.getElementById('blog-overlay');
+const blogTabBtn   = document.getElementById('blog-tab-btn');
+const blogCloseBtn = document.getElementById('blog-close-btn');
+
+blogTabBtn.addEventListener('click', e => {
+  e.preventDefault();
+  blogOverlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+});
+blogCloseBtn.addEventListener('click', () => {
+  blogOverlay.classList.remove('open');
+  document.body.style.overflow = 'auto';
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && blogOverlay.classList.contains('open')) {
+    blogOverlay.classList.remove('open');
+    document.body.style.overflow = 'auto';
+  }
+});
 </script>
 </body>
 </html>
