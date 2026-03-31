@@ -143,11 +143,8 @@
     .tl-item::before {
       content: ''; position: absolute; left: -4px; top: 27px;
       width: 7px; height: 7px; background: var(--accent); border-radius: 50%;
-      animation: pulse-tl-dot 2.4s ease-in-out infinite;
-    }
-    @keyframes pulse-tl-dot {
-      0%, 100% { box-shadow: 0 0 0 3px rgba(90,122,92,.15); }
-      50%       { box-shadow: 0 0 0 5px rgba(90,122,92,.32), 0 0 10px 3px rgba(90,122,92,.13); }
+      box-shadow: 0 0 0 3px rgba(90,122,92,.15);
+      animation: pulse-dot 2.4s ease-in-out infinite;
     }
     .tl-item:last-child { padding-bottom: 4px; }
     .tl-meta { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; flex-wrap: wrap; }
@@ -156,22 +153,21 @@
     .tl-company { font-size: 12.5px; color: var(--accent); margin-bottom: 7px; }
     .tl-desc { font-size: 13.5px; color: var(--muted); line-height: 1.72; }
 
-    /* ── PROJECT CARDS ── */
-    .cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .proj-card {
-      display: flex; flex-direction: column; gap: 10px;
-      padding: 18px 20px; background: var(--card); border: 1px solid var(--border);
-      border-radius: 12px; color: var(--text); text-decoration: none;
-      transition: transform .22s cubic-bezier(.34,1.56,.64,1), border-color .2s, box-shadow .2s;
+    /* ── PROJECT BUBBLES ── */
+    .bubbles-wrap { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+    .proj-bubble {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 10px 20px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 999px; color: var(--text); text-decoration: none; font-size: 13px;
+      transition: transform .2s cubic-bezier(.34,1.56,.64,1), border-color .2s, box-shadow .2s;
     }
-    .proj-card:hover {
-      transform: translateY(-4px) scale(1.02);
-      border-color: rgba(90,122,92,.5);
-      box-shadow: 0 10px 28px rgba(0,0,0,.5), 0 0 0 1px rgba(90,122,92,.1);
+    .proj-bubble:hover {
+      transform: scale(1.06);
+      border-color: rgba(90,122,92,.55);
+      box-shadow: 0 0 0 1px rgba(90,122,92,.12), 0 8px 24px rgba(0,0,0,.45);
     }
-    .proj-card-header { display: flex; align-items: center; justify-content: space-between; }
-    .proj-card-name { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-    .bubble-icon { font-size: 15px; line-height: 1; }
+    .proj-bubble--lg { padding: 12px 26px; font-size: 14px; font-weight: 500; }
+    .bubble-icon { font-size: 16px; line-height: 1; }
     .bubble-tag {
       font-family: var(--mono); font-size: 10px; color: var(--muted);
       padding: 2px 8px; background: rgba(255,255,255,.04);
@@ -327,42 +323,36 @@
         <div class="sec-line"></div>
         <a href="#" class="sec-more">see all →</a>
       </div>
-      <div class="cards-grid">
-        <a class="proj-card" href="#">
-          <div class="proj-card-header">
-            <span class="proj-card-name"><span class="bubble-icon">⌨</span>DevKit CLI</span>
-            <span class="bubble-tag">TypeScript</span>
-          </div>
+      <div class="bubbles-wrap">
+        <a class="proj-bubble proj-bubble--lg" href="#">
+          <span class="bubble-icon">⌨</span>
+          <span>DevKit CLI</span>
+          <span class="bubble-tag">TypeScript</span>
         </a>
-        <a class="proj-card" href="#">
-          <div class="proj-card-header">
-            <span class="proj-card-name"><span class="bubble-icon">◈</span>Meshflow</span>
-            <span class="bubble-tag">React</span>
-          </div>
+        <a class="proj-bubble proj-bubble--lg" href="#">
+          <span class="bubble-icon">◈</span>
+          <span>Meshflow</span>
+          <span class="bubble-tag">React</span>
         </a>
-        <a class="proj-card" href="#">
-          <div class="proj-card-header">
-            <span class="proj-card-name"><span class="bubble-icon">⬡</span>Snapschema</span>
-            <span class="bubble-tag">Validation</span>
-          </div>
+        <a class="proj-bubble" href="#">
+          <span class="bubble-icon">⬡</span>
+          <span>Snapschema</span>
+          <span class="bubble-tag">Validation</span>
         </a>
-        <a class="proj-card" href="#">
-          <div class="proj-card-header">
-            <span class="proj-card-name"><span class="bubble-icon">✦</span>Patchwork</span>
-            <span class="bubble-tag">CSS-in-JS</span>
-          </div>
+        <a class="proj-bubble" href="#">
+          <span class="bubble-icon">✦</span>
+          <span>Patchwork</span>
+          <span class="bubble-tag">CSS-in-JS</span>
         </a>
-        <a class="proj-card" href="#">
-          <div class="proj-card-header">
-            <span class="proj-card-name"><span class="bubble-icon">⟁</span>Kestrel</span>
-            <span class="bubble-tag">Go</span>
-          </div>
+        <a class="proj-bubble" href="#">
+          <span class="bubble-icon">⟁</span>
+          <span>Kestrel</span>
+          <span class="bubble-tag">Go</span>
         </a>
-        <a class="proj-card" href="#">
-          <div class="proj-card-header">
-            <span class="proj-card-name"><span class="bubble-icon">▦</span>Logdeck</span>
-            <span class="bubble-tag">Node.js</span>
-          </div>
+        <a class="proj-bubble" href="#">
+          <span class="bubble-icon">▦</span>
+          <span>Logdeck</span>
+          <span class="bubble-tag">Node.js</span>
         </a>
       </div>
     </section>
