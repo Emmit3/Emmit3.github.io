@@ -865,82 +865,88 @@ function disposeThreeDotted() {
 }
 
 // ════════════════════════════════════════════════════════
-//  RED-DOT LIDAR REVEAL — uniform grid · cell noise · depth scan
+//  RED-DOT LIDAR REVEAL
 // ════════════════════════════════════════════════════════
-// Translates the Three.js TSL shader pipeline to Canvas 2D:
-//   brightness = mx_cell_noise_float(uv × tiling)    → Worley noise per grid cell
-//   dot        = smoothstep(0.5, 0.49, dist)          → arc() at variable radius
-//   depth      = yNorm + low-freq noise               → pseudo-depth per dot
-//   flow       = oneMinus(smoothstep(0, BAND, |depth−progress|)) → narrow depth band
-//   mask       = dot × flow × vec3(10, 0, 0)          → oversaturated red, screen blend
-const CELL      = 7;      // px per cell (~110 cells/800px ≈ ref's 120 cells/300px)
-const W_FEAT    = 9;      // Worley feature-point scale
-const SCAN_BAND = 0.032;  // depth half-width (ref uses smoothstep 0→0.02)
+// Exact Canvas 2D translation of the TSL shader:
+//
+//   tiling   = vec2(120)
+//   tiledUv  = mod(tUv * 120, 2) - 1          → period = 2 in tile-space → 60 cells/axis
+//   dist     = tiledUv.length()
+//   dot      = smoothstep(0.5, 0.49, dist)     → sharp circle, r ≈ 0.49 of half-cell
+//   brightness = mx_cell_noise_float(tUv*60)   → smooth value noise, same frequency as grid
+//   depth    = depthMap                        → simulated via FBM + Y bias
+//   flow     = 1 - smoothstep(0, 0.02, |depth-progress|)  ← only ±2% band lit
+//   mask     = dot × flow × vec3(10, 0, 0)    → pure red, ×10 oversaturation (clamped)
+//   final    = blendScreen(tMap, mask)         → phosphor trail + bloom passes
 
 let scanState = null;
 
-function buildDotGrid() {
-  const cols = Math.ceil(W / CELL) + 1;
-  const rows = Math.ceil(H / CELL) + 1;
-  const fc   = Math.ceil(cols / W_FEAT) + 2;
-  const fr   = Math.ceil(rows / W_FEAT) + 2;
-
-  // Deterministic Worley feature points (mirrors mx_cell_noise_float sin-hash)
-  const fp = [];
-  for (let fy = 0; fy <= fr; fy++) {
-    fp.push([]);
-    for (let fx = 0; fx <= fc; fx++) {
-      const h1 = Math.abs(Math.sin(fx * 127.1 + fy * 311.7 + 13.7));
-      const h2 = Math.abs(Math.sin(fx * 269.5 + fy * 183.3 + 71.3));
-      fp[fy].push([fx * W_FEAT + h1 * W_FEAT * 0.85,
-                   fy * W_FEAT + h2 * W_FEAT * 0.85]);
-    }
+// ── noise helpers ──────────────────────────────────────────────────────────
+function _h2d(ix, iy) {
+  const v = Math.sin(ix * 127.1 + iy * 311.7) * 43758.5453;
+  return v - Math.floor(v);
+}
+function _vnoise(x, y) {                       // smooth 2D value noise ∈ [0,1]
+  const ix = x | 0, iy = y | 0;
+  const fx = x - ix, fy = y - iy;
+  const ux = fx * fx * (3 - 2 * fx);
+  const uy = fy * fy * (3 - 2 * fy);
+  return _h2d(ix, iy)     * (1-ux) * (1-uy)
+       + _h2d(ix+1, iy)   *   ux   * (1-uy)
+       + _h2d(ix, iy+1)   * (1-ux) *    uy
+       + _h2d(ix+1, iy+1) *   ux   *    uy;
+}
+function _fbm(x, y) {                          // 4-octave fBm for organic depth map
+  let v = 0, a = 0.5, f = 1;
+  for (let i = 0; i < 4; i++) {
+    v += a * _vnoise(x * f, y * f);
+    a *= 0.5; f *= 2.1;
   }
+  return v;
+}
+
+function buildScanDots() {
+  // mod(tUv * 120, 2) - 1 completes one full period per 2/120 = 1/60 of UV
+  // → 60 cell rows in Y, each cell = H/60 px tall (and wide, since dots are square-aspect)
+  const NY    = 60;
+  const cell  = H / NY;                         // px per cell (≈13px@800, ≈18px@1080)
+  const NX    = Math.ceil(W / cell) + 1;
+  const dotr  = 0.49 * cell * 0.5;              // smoothstep(0.5,0.49)→49% of half-cell
+  const asp   = W / H;                           // aspect = WIDTH/HEIGHT (matches shader)
 
   const dots = [];
-  for (let cy = 0; cy < rows; cy++) {
-    const gfy = Math.floor(cy / W_FEAT);
-    for (let cx = 0; cx < cols; cx++) {
-      const gfx = Math.floor(cx / W_FEAT);
-      let minD = 1e9;
-      for (let dfy = -1; dfy <= 1; dfy++) {
-        const nfy = gfy + dfy;
-        if (nfy < 0 || nfy > fr) continue;
-        for (let dfx = -1; dfx <= 1; dfx++) {
-          const nfx = gfx + dfx;
-          if (nfx < 0 || nfx > fc) continue;
-          const [px, py] = fp[nfy][nfx];
-          const dx = cx - px, dy = cy - py;
-          minD = Math.min(minD, dx * dx + dy * dy);
-        }
-      }
-      // Worley brightness: high between feature points, dark at them
-      const brightness = Math.min(1, Math.sqrt(minD) / (W_FEAT * 0.60));
-      if (brightness < 0.07) continue;
+  for (let ry = 0; ry < NY; ry++) {
+    const uvy  = (ry + 0.5) / NY;               // 0..1
+    const tuvy = uvy;                            // tUv.y = uv.y (no aspect correction)
 
-      const x = cx * CELL + CELL * 0.5;
-      const y = cy * CELL + CELL * 0.5;
-      // Dot radius: smoothstep(0.5, 0.49, dist) analogue — brightness-varied size
-      const r = CELL * (0.33 + 0.12 * brightness);
+    for (let rx = 0; rx < NX; rx++) {
+      const uvx  = rx / NX;                      // 0..1
+      const tuvx = uvx * asp;                    // tUv.x = uv.x * aspect
 
-      // Pseudo-depth: Y-normalised + low-freq deterministic noise perturbation.
-      // Creates the organic 3D depth-slice feel of the depth-map shader without
-      // an actual depth texture — nearby dots (low depth) appear first, far last.
-      const yNorm = y / H;
-      const dn    = Math.abs(Math.sin(cx * 0.29 + cy * 0.19 + 4.1)) * 2 - 1;
-      const depth = Math.max(0, Math.min(1, yNorm * 0.82 + dn * 0.20 + 0.08));
+      // brightness = mx_cell_noise_float(tUv * 60)
+      // → smooth value noise sampled at half the dot-grid frequency (matches shader)
+      const brightness = _vnoise(tuvx * 60 + 3.7, tuvy * 60 + 1.9);
+      if (brightness < 0.04) continue;           // skip dots shader's smoothstep kills
 
-      dots.push({ x, y, r, brightness, depth });
+      // depth = depthMap(uv): simulated by fBm + Y bias
+      // fBm creates organic 3D-looking contours; Y bias ensures top→bottom sweep overall
+      const depth = Math.max(0, Math.min(1,
+        _fbm(uvx * 3.5 + 1.3, uvy * 2.7 + 4.1) * 0.55 + uvy * 0.50 - 0.02
+      ));
+
+      // dot radius: base dotr, brightness-scaled (brighter cells can be slightly larger)
+      const r = dotr * (0.80 + 0.40 * brightness);
+
+      dots.push({ x: (rx + 0.5) * cell, y: (ry + 0.5) * cell, r, brightness, depth });
     }
   }
 
-  // Sort ascending by depth → binary-search band sweep, safe early-exit
-  dots.sort((a, b) => a.depth - b.depth);
+  dots.sort((a, b) => a.depth - b.depth);       // sorted → O(band) early-exit in draw
   return dots;
 }
 
 function initScan() {
-  const dots = buildDotGrid();
+  const dots = buildScanDots();
 
   const trailCanvas = document.createElement('canvas');
   trailCanvas.width = W; trailCanvas.height = H;
@@ -972,113 +978,89 @@ function drawScanReveal(progress) {
   if (!scanState) return;
   const { dots, trailCanvas, trailCtx, glowCanvas, glowCtx } = scanState;
 
-  const scanY = progress * H;
-  const pulse = 0.88 + 0.12 * Math.sin(T * 16);
-  const lo    = progress - SCAN_BAND;
-  const hi    = progress + SCAN_BAND;
+  const scanY  = progress * H;
+  const pulse  = 0.88 + 0.12 * Math.sin(T * 16);
+  const BAND   = 0.02;                // smoothstep(0, 0.02, …) — exact shader value
+  const lo     = progress - BAND;
+  const hi     = progress + BAND;
 
-  // ── 1. Glow canvas: render active-band dots in oversaturated red ──────
-  // flow = oneMinus(smoothstep(0, SCAN_BAND, |depth − progress|))
-  // mask = dot × flow × vec3(10, 0, 0)  → clamp to 1, very bright red
+  // ── 1. Glow: draw only dots whose depth falls within the ±BAND slice ──
+  // mask = dot × flow × vec3(10,0,0)  →  alpha = min(1, brightness × flow × 10)
   glowCtx.clearRect(0, 0, W, H);
-  glowCtx.fillStyle = '#ff1200';
+  glowCtx.fillStyle = '#ff1000';     // pure red (G=0, B=0) matches vec3(10,0,0)
 
   for (const dot of dots) {
     if (dot.depth < lo) continue;
-    if (dot.depth > hi) break;          // sorted → safe early exit
+    if (dot.depth > hi) break;        // sorted ascending → safe early exit
 
-    // smoothstep falloff from scan centre outward (mirrors TSL flow)
-    const d    = Math.abs(dot.depth - progress) / SCAN_BAND; // 0 (centre) → 1 (edge)
-    const sm   = d * d * (3 - 2 * d);  // smoothstep(0, 1, d)
-    const flow = 1 - sm;                // 1 at centre, 0 at edge
+    // flow = 1 - smoothstep(0, BAND, |depth - progress|)
+    const t    = Math.abs(dot.depth - progress) / BAND;  // 0=centre, 1=edge
+    const sm   = t * t * (3 - 2 * t);                    // smoothstep(0,1,t)
+    const flow = 1 - sm;
 
-    const alpha = Math.min(1, dot.brightness * flow * pulse * 3.2); // vec3(10) → clamp
-    if (alpha < 0.04) continue;
+    // vec3(10,0,0) × flow — clamped to alpha 1 (fully saturated red at centre)
+    const alpha = Math.min(1, dot.brightness * flow * 10);
+    if (alpha < 0.03) continue;
 
-    glowCtx.globalAlpha = alpha;
+    glowCtx.globalAlpha = alpha * pulse;
     glowCtx.beginPath();
     glowCtx.arc(dot.x, dot.y, dot.r, 0, Math.PI * 2);
     glowCtx.fill();
   }
   glowCtx.globalAlpha = 1;
 
-  // ── 2. Phosphor trail: stamp glow, then decay ──────────────────────────
-  // Simulates blendScreen persistence — dots cool off over ~2 s at 60 fps
+  // ── 2. Phosphor trail: blendScreen persistence ────────────────────────
+  // Accumulate glow into trail; fade rate ~1.8s @ 60fps
   trailCtx.globalCompositeOperation = 'destination-out';
-  trailCtx.globalAlpha = 0.028;
+  trailCtx.globalAlpha = 0.025;
   trailCtx.fillRect(0, 0, W, H);
   trailCtx.globalAlpha = 1;
   trailCtx.globalCompositeOperation = 'source-over';
   trailCtx.drawImage(glowCanvas, 0, 0);
 
-  // ── 3. Main canvas: reveal mask ───────────────────────────────────────
-  ctx.clearRect(0, 0, W, scanY);        // transparent → DOM portfolio shows through
+  // ── 3. Reveal mask ────────────────────────────────────────────────────
+  ctx.clearRect(0, 0, W, scanY);      // transparent → DOM portfolio shows through
   if (scanY < H) {
     ctx.fillStyle = '#000';
-    ctx.fillRect(0, scanY, W, H - scanY); // black → hide unscanned content
+    ctx.fillRect(0, scanY, W, H - scanY);
   }
 
-  // ── 4. Trail composite: three bloom passes (corona → tight glow → crisp)
-  // Mirrors PostProcessing bloom(scenePassColor, strength) two-pass blur
+  // ── 4. Bloom: three passes (wide corona → tight glow → crisp dots) ───
+  // Matches PostProcessing bloom node on scenePassColor
   ctx.save();
   ctx.beginPath();
   ctx.rect(0, 0, W, Math.max(0, scanY));
   ctx.clip();
 
-  ctx.filter      = 'blur(20px)';
-  ctx.globalAlpha = 0.38;
-  ctx.drawImage(trailCanvas, 0, 0);
-
-  ctx.filter      = 'blur(6px)';
-  ctx.globalAlpha = 0.72;
-  ctx.drawImage(trailCanvas, 0, 0);
-
-  ctx.filter      = 'none';
-  ctx.globalAlpha = 1.0;
-  ctx.drawImage(trailCanvas, 0, 0);
+  ctx.filter = 'blur(18px)'; ctx.globalAlpha = 0.32; ctx.drawImage(trailCanvas, 0, 0);
+  ctx.filter = 'blur(5px)';  ctx.globalAlpha = 0.68; ctx.drawImage(trailCanvas, 0, 0);
+  ctx.filter = 'none';       ctx.globalAlpha = 1.00; ctx.drawImage(trailCanvas, 0, 0);
 
   ctx.restore();
 
-  // ── 5. Leading probe: LiDAR tip illuminates content ahead of scan ─────
-  const FORE = 38;
+  // ── 5. Leading probe: glowing tip below scan line ─────────────────────
   if (scanY < H) {
     ctx.save();
     ctx.beginPath();
-    ctx.rect(0, scanY, W, FORE);
+    ctx.rect(0, scanY, W, Math.ceil(H / 60) * 2); // ~2 cell heights of probe depth
     ctx.clip();
-
-    ctx.filter      = 'blur(9px)';
-    ctx.globalAlpha = 0.72;
-    ctx.drawImage(glowCanvas, 0, 0);
-
-    ctx.filter      = 'none';
-    ctx.globalAlpha = 0.88;
-    ctx.drawImage(glowCanvas, 0, 0);
-
+    ctx.filter = 'blur(8px)'; ctx.globalAlpha = 0.70; ctx.drawImage(glowCanvas, 0, 0);
+    ctx.filter = 'none';      ctx.globalAlpha = 0.92; ctx.drawImage(glowCanvas, 0, 0);
     ctx.restore();
   }
 
   // ── 6. Scan-line beam ─────────────────────────────────────────────────
-  // Matches PostProcessing redOverlay × oneMinus(scanLine) × 0.4
-  const beamG = ctx.createLinearGradient(0, scanY - 5, 0, scanY + 5);
+  // PostProcessing: redOverlay = vec3(1,0,0) × oneMinus(scanLine) × 0.4
+  // scanLine = smoothstep(0, scanWidth=0.05, |uvY - scanPos|)
+  const beamH = Math.max(4, H * 0.05 * 0.5); // scanWidth=0.05 → half in each direction
+  const beamG = ctx.createLinearGradient(0, scanY - beamH, 0, scanY + beamH);
   beamG.addColorStop(0,    'transparent');
-  beamG.addColorStop(0.40, `rgba(255, 25,  0, ${0.60 * pulse})`);
-  beamG.addColorStop(0.50, `rgba(255, 80, 10, ${pulse})`);         // hot core
-  beamG.addColorStop(0.60, `rgba(255, 25,  0, ${0.60 * pulse})`);
+  beamG.addColorStop(0.35, `rgba(255, 10, 0, ${0.45 * pulse})`);
+  beamG.addColorStop(0.50, `rgba(255, 60, 0, ${0.95 * pulse})`);  // hot core
+  beamG.addColorStop(0.65, `rgba(255, 10, 0, ${0.45 * pulse})`);
   beamG.addColorStop(1,    'transparent');
   ctx.fillStyle = beamG;
-  ctx.fillRect(0, scanY - 5, W, 10);
-
-  // Horizontal spread — scanWidth = 0.05 from PostProcessing
-  const lineG = ctx.createLinearGradient(0, 0, W, 0);
-  lineG.addColorStop(0,    'rgba(255, 15, 0, 0)');
-  lineG.addColorStop(0.04, `rgba(255, 45, 0, ${0.33 * pulse})`);
-  lineG.addColorStop(0.50, `rgba(255, 60, 5, ${0.50 * pulse})`);
-  lineG.addColorStop(0.96, `rgba(255, 45, 0, ${0.33 * pulse})`);
-  lineG.addColorStop(1,    'rgba(255, 15, 0, 0)');
-  ctx.fillStyle   = lineG;
-  ctx.globalAlpha = 1;
-  ctx.fillRect(0, scanY - 1, W, 2);
+  ctx.fillRect(0, scanY - beamH, W, beamH * 2);
 }
 
 // ════════════════════════════════════════════════════════
